@@ -1,0 +1,14 @@
+dependencies {
+    // 이 모듈만 사용하는 의존성만 작성
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'mysql:mysql-connector-java'
+
+    testImplementation 'org.springframework.batch:spring-batch-test'
+}
+
+// bootJar 설정 (Batch나 Web 실행 파일이 필요한 경우만)
+bootJar { enabled = true }
+jar { enabled = false }

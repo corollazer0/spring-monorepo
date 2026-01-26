@@ -4,7 +4,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     runtimeOnly 'com.h2database:h2'
-    runtimeOnly 'mysql:mysql-connector-java'
+    // MySQL은 나중에 필요할 때 추가 (Step 1은 H2만 사용)
+    // runtimeOnly 'mysql:mysql-connector-java:8.0.33'
 
     testImplementation 'org.springframework.batch:spring-batch-test'
 }

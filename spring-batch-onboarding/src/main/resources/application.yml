@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: batch-flow
+
+  # Spring Batch 설정
+  batch:
+    jdbc:
+      initialize-schema: always  # BATCH_* 메타데이터 테이블 자동 생성
+    job:
+      enabled: false  # 애플리케이션 시작 시 자동 실행 비활성화 (테스트/수동 실행용)
+
+  # H2 데이터베이스 설정
+  datasource:
+    url: jdbc:h2:mem:batchdb;MODE=MySQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  # JPA 설정
+  jpa:
+    hibernate:
+      ddl-auto: create  # 애플리케이션 시작 시 테이블 자동 생성
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+
+  # H2 콘솔 설정
+  h2:
+    console:
+      enabled: true  # H2 웹 콘솔 활성화
+      path: /h2-console  # 접속 경로: http://localhost:8080/h2-console
+
+# 로깅 설정
+logging:
+  level:
+    com.batchflow: DEBUG  # 배치 애플리케이션 로그
+    org.springframework.batch: INFO  # Spring Batch 프레임워크 로그

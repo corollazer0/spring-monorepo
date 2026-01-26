@@ -53,7 +53,7 @@
 ## 1.2 프로젝트 구조
 
 ```
-batchflow/
+spring-batch-onboarding/
 ├── build.radle
 ├── settings.gradle
 ├── README.md

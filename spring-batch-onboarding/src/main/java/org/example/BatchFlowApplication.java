@@ -6,6 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class BatchFlowApplication {
     public static void main(String[] args) {
-        SpringApplication.run(BatchApplication.class, args);
+        SpringApplication.run(BatchFlowApplication.class, args);
     }
 }

@@ -28,7 +28,7 @@
 
 - [x] Step 12: Thymeleaf 화면 5종 + View 테스트 + EntryPoint 분기 + bootRun 스모크 검증 — `31c7546`
 - [x] 에이전트 5종(.claude/agents) + 스킬 9종(.claude/skills) + 루트 CLAUDE.md 안내 — `aee232f`
-- [x] plan.md / task.md 신설 + 모듈 CLAUDE.md에 유지 규칙 추가 — (이 커밋)
+- [x] plan.md / task.md 신설 + 모듈 CLAUDE.md에 유지 규칙 추가 — `4435f5f`
 
 ## Plan 4: 다음 후보 — 📝 미착수
 

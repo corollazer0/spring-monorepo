@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * 게시판 서비스 — Step 2 테스트 대상.
  *
@@ -28,6 +31,16 @@ public class BoardService {
     public PostResponse getPost(Long postId) {
         Post post = findPostOrThrow(postId);
         return PostResponse.from(post);
+    }
+
+    /**
+     * 페이징 목록 조회 — page는 1부터 시작.
+     */
+    public List<PostResponse> getPosts(int page, int size) {
+        int offset = (page - 1) * size;
+        return boardDao.findPage(offset, size).stream()
+                .map(PostResponse::from)
+                .collect(Collectors.toList());
     }
 
     public Long createPost(String writerUsername, PostCreateRequest request) {

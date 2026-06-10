@@ -64,6 +64,10 @@ public class BoardService {
         log.info(">>>>> [BoardService] 게시글 수정 완료. postId={}", postId);
     }
 
+    public long countPosts() {
+        return boardDao.count();
+    }
+
     public void deletePost(Long postId, String requesterUsername) {
         Post post = findPostOrThrow(postId);
         validateOwner(post, requesterUsername);

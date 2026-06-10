@@ -30,6 +30,10 @@
 - [x] 에이전트 5종(.claude/agents) + 스킬 9종(.claude/skills) + 루트 CLAUDE.md 안내 — `aee232f`
 - [x] plan.md / task.md 신설 + 모듈 CLAUDE.md에 유지 규칙 추가 — `4435f5f`
 
+## 소규모 개선 (수시)
+
+- [x] 완전 초보자용 실행 가이드(모듈 README.md) 신설 + 루트 README 링크 — `2e97d76`
+
 ## Plan 4: 다음 후보 — 📝 미착수
 
 - [ ] 학습자 파일럿 운영 및 피드백 반영

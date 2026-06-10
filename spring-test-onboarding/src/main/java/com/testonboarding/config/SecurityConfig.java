@@ -9,6 +9,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Security 설정 — 세션 + 폼로그인 기반.
  *
@@ -53,8 +55,17 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
 
                 // 세션 기반 폼로그인: POST /login (username, password 폼 파라미터)
-                .formLogin(form -> form.loginProcessingUrl("/login"))
-                .logout(logout -> logout.logoutUrl("/logout"));
+                // REST API이므로 성공/실패를 redirect(302) 대신 상태코드로 응답한다 (Step 8 E2E)
+                .formLogin(form -> form
+                        .loginProcessingUrl("/login")
+                        .successHandler((request, response, authentication) ->
+                                response.setStatus(HttpServletResponse.SC_OK))
+                        .failureHandler((request, response, exception) ->
+                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED)))
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessHandler((request, response, authentication) ->
+                                response.setStatus(HttpServletResponse.SC_OK)));
 
         return http.build();
     }

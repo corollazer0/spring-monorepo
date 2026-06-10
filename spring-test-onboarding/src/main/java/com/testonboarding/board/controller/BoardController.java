@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.security.Principal;
 import java.util.List;
@@ -50,7 +51,7 @@ public class BoardController {
      * 미인증 요청은 Security가 여기 오기 전에 401로 차단한다(SecurityConfig).
      */
     @PostMapping
-    public ResponseEntity<Void> createPost(@RequestBody PostCreateRequest request,
+    public ResponseEntity<Void> createPost(@Valid @RequestBody PostCreateRequest request,
                                            Principal principal) {
         Long postId = boardService.createPost(principal.getName(), request);
         return ResponseEntity.created(URI.create("/api/posts/" + postId)).build();
@@ -58,7 +59,7 @@ public class BoardController {
 
     @PutMapping("/{postId}")
     public ResponseEntity<Void> updatePost(@PathVariable Long postId,
-                                           @RequestBody PostUpdateRequest request,
+                                           @Valid @RequestBody PostUpdateRequest request,
                                            Principal principal) {
         boardService.updatePost(postId, principal.getName(), request);
         return ResponseEntity.ok().build();

@@ -5,6 +5,7 @@ import com.testonboarding.board.controller.BoardController;
 import com.testonboarding.board.dto.PostCreateRequest;
 import com.testonboarding.board.dto.PostResponse;
 import com.testonboarding.board.service.BoardService;
+import com.testonboarding.common.exception.GlobalExceptionHandler;
 import com.testonboarding.common.exception.PostNotFoundException;
 import com.testonboarding.config.SecurityConfig;
 import org.junit.jupiter.api.DisplayName;
@@ -13,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -47,8 +50,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * ⚠️ @Import(SecurityConfig.class):
  * 이게 없으면 Spring Boot의 "기본 보안 설정"(모든 요청 인증 필요)이 적용되어
  * permitAll이어야 할 GET조차 401이 떨어진다. Lessons Learned 참고.
+ *
+ * 📌 excludeFilters로 GlobalExceptionHandler(Step 5에서 추가됨)를 의도적으로 제외했다.
+ *    이 클래스는 "전역 예외 처리기가 없던 Step 4 시점의 세계"를 보존하는 교보재다 —
+ *    아래 cliffhanger 테스트(예외가 그대로 터지는 현상)를 영구히 재현하기 위함.
  */
-@WebMvcTest(BoardController.class)
+@WebMvcTest(controllers = BoardController.class,
+        excludeFilters = @ComponentScan.Filter(
+                type = FilterType.ASSIGNABLE_TYPE,
+                classes = GlobalExceptionHandler.class))
 @Import(SecurityConfig.class)
 @DisplayName("게시판 컨트롤러 (@WebMvcTest)")
 class BoardControllerTest {

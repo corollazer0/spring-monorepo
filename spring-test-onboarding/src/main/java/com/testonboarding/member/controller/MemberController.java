@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.security.Principal;
 
@@ -28,7 +29,7 @@ public class MemberController {
      * 회원가입 — SecurityConfig에서 permitAll (비회원이 쓰는 기능이므로)
      */
     @PostMapping
-    public ResponseEntity<Void> signup(@RequestBody MemberSignupRequest request) {
+    public ResponseEntity<Void> signup(@Valid @RequestBody MemberSignupRequest request) {
         Long memberId = memberService.signup(request);
         return ResponseEntity.created(URI.create("/api/members/" + memberId)).build();
     }

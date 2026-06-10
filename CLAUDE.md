@@ -11,17 +11,17 @@
 
 ```
 spring-onboarding/                    # 루트
-├── .claude.md                        # 이 파일 (공통 규칙)
+├── CLAUDE.md                        # 이 파일 (공통 규칙)
 ├── spring-web-onboarding/            # [Web] 실시간 API 서버
-│   └── .claude.md                    # 웹 모듈 전용 규칙
+│   └── CLAUDE.md                    # 웹 모듈 전용 규칙
 └── spring-batch-onboarding/          # [Batch] 대용량 배치 처리
-    └── .claude.md                    # 배치 모듈 전용 규칙
+    └── CLAUDE.md                    # 배치 모듈 전용 규칙
 ```
 
 | 모듈 | 목적 | 상세 규칙 |
 |------|------|----------|
-| `spring-web-onboarding` | 실시간 API 서버 | `./spring-web-onboarding/.claude.md` |
-| `spring-batch-onboarding` | 대용량 배치 처리 | `./spring-batch-onboarding/.claude.md` |
+| `spring-web-onboarding` | 실시간 API 서버 | `./spring-web-onboarding/CLAUDE.md` |
+| `spring-batch-onboarding` | 대용량 배치 처리 | `./spring-batch-onboarding/CLAUDE.md` |
 
 ---
 
@@ -53,8 +53,8 @@ import com.webonboarding.controller.MemberController;    // NEVER!
 
 | 사용자 요청 | 작업 디렉토리 | 참조할 규칙 |
 |-------------|--------------|-------------|
-| "웹 구현해줘" | `./spring-web-onboarding` | `spring-web-onboarding/.claude.md` |
-| "배치 Job 만들어줘" | `./spring-batch-onboarding` | `spring-batch-onboarding/.claude.md` |
+| "웹 구현해줘" | `./spring-web-onboarding` | `spring-web-onboarding/CLAUDE.md` |
+| "배치 Job 만들어줘" | `./spring-batch-onboarding` | `spring-batch-onboarding/CLAUDE.md` |
 
 ---
 
@@ -190,12 +190,12 @@ GET /api/members/{id} 엔드포인트 추가
 
 ## 📚 모듈별 상세 규칙
 
-각 모듈의 상세한 규칙은 해당 모듈의 `.claude.md` 파일을 참조하세요.
+각 모듈의 상세한 규칙은 해당 모듈의 `CLAUDE.md` 파일을 참조하세요.
 
 | 모듈 | 파일 위치 | 주요 내용 |
 |------|----------|----------|
-| Batch | `spring-batch-onboarding/.claude.md` | Spring Batch 설정, Job/Step 규칙, 테스트 규칙 |
-| Web | `spring-web-onboarding/.claude.md` | Controller/Service 규칙, API 설계 규칙 *(추후 추가)* |
+| Batch | `spring-batch-onboarding/CLAUDE.md` | Spring Batch 설정, Job/Step 규칙, 테스트 규칙 |
+| Web | `spring-web-onboarding/CLAUDE.md` | Controller/Service 규칙, API 설계 규칙 *(추후 추가)* |
 
 ---
 

@@ -1,7 +1,7 @@
 # BatchFlow - Spring Batch 온보딩 프로젝트
 
 > ⚠️ 이 파일은 `spring-batch-onboarding` 모듈 전용 규칙입니다.
-> 공통 규칙은 **루트 `.claude.md`** 를 참조하세요.
+> 공통 규칙은 **루트 `CLAUDE.md`** 를 참조하세요.
 
 ---
 
@@ -33,7 +33,7 @@ Gradle:         8.x
 
 ```
 spring-batch-onboarding/
-├── .claude.md                          # 이 파일
+├── CLAUDE.md                          # 이 파일
 ├── src/main/java/com/batchflow/
 │   ├── BatchflowApplication.java       # 메인 클래스
 │   │
@@ -357,7 +357,7 @@ docs/skills/spring-batch-performance.md 참고"
 
 | 문서 | 경로 |
 |------|------|
-| 공통 규칙 | `루트 .claude.md` |
+| 공통 규칙 | `루트 CLAUDE.md` |
 | 커리큘럼 전체 | `docs/00-BatchFlow-Curriculum.md` |
 | AI 프롬프트 가이드 | `docs/01-AI-Prompt-Guide.md` |
 | DB 스키마 및 초기 데이터 | `docs/04-Database-Schema-And-Data.md` |

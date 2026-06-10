@@ -1,7 +1,7 @@
 # WebFlow - Spring Web 온보딩 프로젝트
 
 > ⚠️ 이 파일은 `spring-web-onboarding` 모듈 전용 규칙입니다.
-> 공통 규칙은 **루트 `.claude.md`** 를 참조하세요.
+> 공통 규칙은 **루트 `CLAUDE.md`** 를 참조하세요.
 
 ---
 
@@ -33,7 +33,7 @@ Gradle:         8.x
 
 ```
 spring-web-onboarding/
-├── .claude.md                          # 이 파일
+├── CLAUDE.md                          # 이 파일
 ├── src/main/java/com/webonboarding/
 │   ├── WebOnboardingApplication.java   # 메인 클래스
 │   │
@@ -129,7 +129,7 @@ class MemberIntegrationTest { }
 
 | 문서 | 경로 |
 |------|------|
-| 공통 규칙 | `루트 .claude.md` |
+| 공통 규칙 | `루트 CLAUDE.md` |
 
 ---
 

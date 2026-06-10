@@ -171,7 +171,7 @@ Step 09의 Chunk 기반 처리 모델을 구현해줘.
 @docs/skills/spring-batch-chunk.md 참고
 ```
 
-> `.claude.md`에 교육자료 규칙이 있으므로, AI가 자동으로 `FOR-BatchFlow-Step09.md`도 생성
+> `CLAUDE.md`에 교육자료 규칙이 있으므로, AI가 자동으로 `FOR-BatchFlow-Step09.md`도 생성
 
 ---
 
@@ -196,7 +196,7 @@ Step 20 Skip 처리 로직 빠르게 프로토타이핑 해줘.
 교육자료 생략.
 ```
 
-> `.claude.md`에 "생략" 명시 시 교육자료 안 만들도록 규칙이 있으므로 생략됨
+> `CLAUDE.md`에 "생략" 명시 시 교육자료 안 만들도록 규칙이 있으므로 생략됨
 
 ---
 
@@ -219,7 +219,7 @@ FOR-BatchFlow-Step09.md 교육 가이드만 작성해줘.
 ## 최종 추천 구조
 ```
 project/
-├── .claude.md                    # 간략한 규칙 + 스킬 참조
+├── CLAUDE.md                    # 간략한 규칙 + 스킬 참조
 ├── docs/
 │   ├── skills/
 │   │   ├── spring-batch-core.md

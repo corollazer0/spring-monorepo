@@ -143,4 +143,4 @@ Validation / Security / Filter
 | Step별 교육 가이드 | `docs/test/education/FOR-Test-StepNN.md` |
 | 캡스톤 요구사항 | `docs/test/education/FOR-Test-Step09-Requirements.md` |
 | 어노테이션 치트시트 | `docs/test/skills/spring-test-annotations.md` |
-| 모듈 규칙 | `spring-test-onboarding/.claude.md` |
+| 모듈 규칙 | `spring-test-onboarding/CLAUDE.md` |

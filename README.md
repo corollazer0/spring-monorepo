@@ -34,6 +34,9 @@ Java 1.8 · Spring Boot 2.7.17 · Gradle 8.x · JUnit 5 · Lombok
 # → http://localhost:8080/posts  (로그인: writer1 / spring123!)
 ```
 
+> 🔰 **처음이신가요?** JDK 설치 확인부터 H2 콘솔, IntelliJ 설정, FAQ까지 담은
+> **완전 초보자용 실행 가이드** → [spring-test-onboarding/README.md](./spring-test-onboarding/README.md)
+
 > 요구사항: JDK 8+ (JDK 11 권장). Gradle은 wrapper가 포함되어 있어 별도 설치 불필요.
 
 ---

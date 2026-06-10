@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: test-craft-test
+
+  # 테스트 전용 H2 — main과 동일하게 MS-SQL 호환 모드 유지
+  # @MybatisTest에서 이 URL을 쓰려면 @AutoConfigureTestDatabase(replace = Replace.NONE) 필수!
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MSSQLServer;DATABASE_TO_LOWER=FALSE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  sql:
+    init:
+      mode: embedded
+
+mybatis:
+  mapper-locations: classpath:mybatis/mapper/*.xml
+  type-aliases-package: com.testonboarding
+  configuration:
+    map-underscore-to-camel-case: true
+
+logging:
+  level:
+    com.testonboarding: DEBUG

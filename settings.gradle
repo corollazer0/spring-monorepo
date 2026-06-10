@@ -2,3 +2,4 @@ rootProject.name = 'spring-monorepo'
 
 include 'spring-batch-onboarding'
 include 'spring-web-onboarding'
+include 'spring-test-onboarding'

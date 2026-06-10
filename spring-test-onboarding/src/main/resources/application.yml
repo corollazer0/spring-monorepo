@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: test-craft
+
+  # H2 데이터베이스 설정
+  # MODE=MSSQLServer: 실무 DB(MS-SQL)와 SQL 방언을 맞추기 위한 호환 모드
+  # - OFFSET/FETCH 페이징, GETDATE(), [대괄호] 식별자 등 T-SQL 문법 일부 지원
+  # - 단, 진짜 MS-SQL과 100% 동일하지는 않음 (OUTPUT 절, 저장 프로시저 등 불가)
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MSSQLServer;DATABASE_TO_LOWER=FALSE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  # schema.sql / data.sql 자동 실행 (embedded DB일 때만)
+  sql:
+    init:
+      mode: embedded
+
+  # H2 웹 콘솔 (http://localhost:8080/h2-console)
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+# MyBatis 설정
+mybatis:
+  mapper-locations: classpath:mybatis/mapper/*.xml
+  type-aliases-package: com.testonboarding
+  configuration:
+    map-underscore-to-camel-case: true  # post_id 컬럼 → postId 필드 자동 매핑
+
+# 로깅 설정
+logging:
+  level:
+    com.testonboarding: DEBUG

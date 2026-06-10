@@ -10,6 +10,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/spring-batch-onboarding" />
+            <option value="$PROJECT_DIR$/spring-test-onboarding" />
             <option value="$PROJECT_DIR$/spring-web-onboarding" />
           </set>
         </option>

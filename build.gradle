@@ -27,7 +27,13 @@ subprojects {
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
     }
 
+    // 한글 소스/리소스를 위한 인코딩 고정 (Windows 기본 cp949 방지)
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+
     test {
         useJUnitPlatform()
+        jvmArgs '-Dfile.encoding=UTF-8'
     }
 }

@@ -13,9 +13,11 @@ spring:
     password:
 
   # schema.sql / data.sql 자동 실행 (embedded DB일 때만)
+  # encoding 누락 시 Windows에서 cp949로 읽어 한글 시드 데이터가 깨진다!
   sql:
     init:
       mode: embedded
+      encoding: UTF-8
 
   # H2 웹 콘솔 (http://localhost:8080/h2-console)
   h2:

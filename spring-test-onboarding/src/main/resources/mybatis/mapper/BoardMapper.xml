@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.testonboarding.board.dao.BoardDao">
+
+    <!-- 공통 컬럼: map-underscore-to-camel-case 설정으로 post_id → postId 자동 매핑 -->
+    <sql id="postColumns">
+        post_id, writer, title, content, created_at
+    </sql>
+
+    <select id="findById" resultType="Post">
+        SELECT <include refid="postColumns"/>
+        FROM post
+        WHERE post_id = #{postId}
+    </select>
+
+    <!--
+        페이징: MS-SQL 스타일 OFFSET ... ROWS FETCH NEXT ... ROWS ONLY
+        (MySQL의 LIMIT과 달리 ORDER BY가 반드시 먼저 와야 한다)
+    -->
+    <select id="findPage" resultType="Post">
+        SELECT <include refid="postColumns"/>
+        FROM post
+        ORDER BY post_id DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+    </select>
+
+    <!--
+        동적 검색: <where>는 내부 <if>가 하나라도 살아나면 WHERE를 붙이고
+        맨 앞의 AND/OR를 알아서 지워준다.
+        문자열 연결은 CONCAT 사용 — MS-SQL(2012+)과 H2 양쪽에서 동작한다.
+    -->
+    <select id="search" parameterType="PostSearchCondition" resultType="Post">
+        SELECT <include refid="postColumns"/>
+        FROM post
+        <where>
+            <if test="title != null and title != ''">
+                AND title LIKE CONCAT('%', #{title}, '%')
+            </if>
+            <if test="writer != null and writer != ''">
+                AND writer = #{writer}
+            </if>
+        </where>
+        ORDER BY post_id DESC
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM post
+    </select>
+
+    <!--
+        useGeneratedKeys: DB(IDENTITY)가 채번한 PK를 keyProperty(postId)에 다시 채워준다.
+        insert가 끝나면 자바 객체의 post.getPostId()로 새 PK를 읽을 수 있다.
+    -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="postId">
+        INSERT INTO post (writer, title, content)
+        VALUES (#{writer}, #{title}, #{content})
+    </insert>
+
+    <update id="update">
+        UPDATE post
+        SET title = #{title},
+            content = #{content}
+        WHERE post_id = #{postId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM post
+        WHERE post_id = #{postId}
+    </delete>
+
+</mapper>

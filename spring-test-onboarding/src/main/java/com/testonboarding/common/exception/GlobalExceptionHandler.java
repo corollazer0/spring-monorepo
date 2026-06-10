@@ -47,6 +47,18 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.FORBIDDEN, e.getMessage());
     }
 
+    @ExceptionHandler(CommentNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCommentNotFound(CommentNotFoundException e) {
+        log.warn(">>>>> [WARN] 댓글 없음: {}", e.getMessage());
+        return errorResponse(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
+    @ExceptionHandler(NotCommentOwnerException.class)
+    public ResponseEntity<ErrorResponse> handleNotCommentOwner(NotCommentOwnerException e) {
+        log.warn(">>>>> [WARN] 댓글 소유자 아님: {}", e.getMessage());
+        return errorResponse(HttpStatus.FORBIDDEN, e.getMessage());
+    }
+
     @ExceptionHandler(DuplicateUsernameException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateUsername(DuplicateUsernameException e) {
         log.warn(">>>>> [WARN] 중복 아이디: {}", e.getMessage());

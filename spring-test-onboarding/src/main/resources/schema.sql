@@ -27,3 +27,11 @@ CREATE TABLE post (
     content     NVARCHAR(2000) NOT NULL,
     created_at  DATETIME       NOT NULL DEFAULT GETDATE()
 );
+
+CREATE TABLE comment (
+    comment_id  BIGINT IDENTITY PRIMARY KEY,
+    post_id     BIGINT         NOT NULL,
+    writer      NVARCHAR(50)   NOT NULL,
+    content     NVARCHAR(500)  NOT NULL,
+    created_at  DATETIME       NOT NULL DEFAULT GETDATE()
+);

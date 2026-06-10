@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.testonboarding.comment.dao.CommentDao">
+
+    <sql id="commentColumns">
+        comment_id, post_id, writer, content, created_at
+    </sql>
+
+    <select id="findById" resultType="Comment">
+        SELECT <include refid="commentColumns"/>
+        FROM comment
+        WHERE comment_id = #{commentId}
+    </select>
+
+    <!-- 댓글은 등록순(오래된 것 먼저) -->
+    <select id="findByPostId" resultType="Comment">
+        SELECT <include refid="commentColumns"/>
+        FROM comment
+        WHERE post_id = #{postId}
+        ORDER BY comment_id ASC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="commentId">
+        INSERT INTO comment (post_id, writer, content)
+        VALUES (#{postId}, #{writer}, #{content})
+    </insert>
+
+    <delete id="deleteById">
+        DELETE FROM comment
+        WHERE comment_id = #{commentId}
+    </delete>
+
+</mapper>

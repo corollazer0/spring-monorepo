@@ -194,8 +194,36 @@ GET /api/members/{id} 엔드포인트 추가
 
 | 모듈 | 파일 위치 | 주요 내용 |
 |------|----------|----------|
+| Test | `spring-test-onboarding/CLAUDE.md` | TestCraft 학습 모듈, example/exercise/answer 규약, plan/task 운영 |
 | Batch | `spring-batch-onboarding/CLAUDE.md` | Spring Batch 설정, Job/Step 규칙, 테스트 규칙 |
 | Web | `spring-web-onboarding/CLAUDE.md` | Controller/Service 규칙, API 설계 규칙 *(추후 추가)* |
+
+---
+
+## 🤖 에이전트 & 스킬 (AI 협업 체계)
+
+이 레포에는 공용 서브에이전트 5종(`.claude/agents/`)과 스킬 9종(`.claude/skills/`)이 구성되어 있다.
+타 프로젝트에 이식할 때는 `.claude/` 폴더를 복사한다 (TestCraft 특화인 `testcraft-step-doc` 스킬은 제외 가능).
+
+### 에이전트 — 역할별 위임 (각자 권한이 다르다)
+
+| 에이전트 | 역할 | 권한 |
+|---------|------|------|
+| `spring-developer` | 기능 구현/수정, 리뷰 반영 | 전체 (코드 변경의 단일 창구) |
+| `test-writer` | 테스트 전략 수립 + 작성 + 변이 검증 | 전체 |
+| `code-reviewer` | 심각도별 리뷰 보고서 | **읽기 전용** (수정은 developer에게) |
+| `code-analyst` | 영향 분석, 장애 원인 추적, 구조 파악 | 읽기 + 진단 실행 |
+| `edu-writer` | 교육/온보딩/기술 문서 | 문서 파일만 |
+
+### 스킬 — 조직 표준의 지식 단위
+
+구현: `layered-impl` `mybatis-mssql` `security-patterns` /
+테스트: `spring-test-strategy` / 리뷰: `code-review-java8` /
+문서: `education-doc`(범용) `testcraft-step-doc`(TestCraft 전용) /
+운영: `step-commit`(커밋+plan/task 갱신) `spring-troubleshoot`(진단표)
+
+규칙: 에이전트와 직접 작업 모두, 해당 영역의 스킬 표준을 우선 적용한다.
+새로 발견한 함정은 `spring-troubleshoot` 진단표에 추가해 자산화한다.
 
 ---
 

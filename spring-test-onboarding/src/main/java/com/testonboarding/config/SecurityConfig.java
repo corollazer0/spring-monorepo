@@ -1,12 +1,18 @@
 package com.testonboarding.config;
 
+import com.testonboarding.auth.jwt.JwtAuthenticationFilter;
+import com.testonboarding.auth.jwt.JwtTokenProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import javax.servlet.http.HttpServletResponse;
@@ -32,7 +38,54 @@ import javax.servlet.http.HttpServletResponse;
 @Configuration
 public class SecurityConfig {
 
+    /**
+     * [심화 Step 10] JWT 빈들 — @Component 대신 여기서 등록하는 이유:
+     * @WebMvcTest 슬라이스가 @Import(SecurityConfig.class) 하나로
+     * 보안 설정 + JWT 필터 + 프로바이더를 전부 가져갈 수 있게 하기 위함.
+     */
     @Bean
+    public JwtTokenProvider jwtTokenProvider(
+            @Value("${jwt.secret:testcraft-jwt-secret-key-for-learning-only-do-not-use}") String secret,
+            @Value("${jwt.validity-millis:3600000}") long validityMillis) {
+        return new JwtTokenProvider(secret, validityMillis);
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
+        return new JwtAuthenticationFilter(jwtTokenProvider);
+    }
+
+    /**
+     * [심화 Step 10] /api/v2/** 전용 JWT 체인 — @Order(1)이라 먼저 매칭을 시도한다.
+     *
+     * 세션 체인과의 차이:
+     * - STATELESS: 세션을 만들지도, 쓰지도 않는다 (매 요청 토큰으로 인증)
+     * - CSRF 비활성: 세션 쿠키가 없으므로 CSRF 공격 표면 자체가 없다
+     * - JwtAuthenticationFilter가 Bearer 토큰을 해석해 인증을 심는다
+     *
+     * @Autowired(필터)는 메서드 파라미터 주입 — JwtAuthenticationFilter가 @Component라 가능.
+     */
+    @Bean
+    @Order(1)
+    public SecurityFilterChain jwtFilterChain(HttpSecurity http,
+                                              JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+        http
+                .antMatcher("/api/v2/**") // 이 체인은 /api/v2/** 요청에만 적용된다
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                .authorizeHttpRequests(auth -> auth
+                        .antMatchers("/api/v2/auth/token").permitAll()
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(2) // v2가 아닌 모든 요청은 이 세션 체인이 담당한다
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 // REST API이므로 미인증 시 로그인 페이지로 redirect(302) 대신 401 응답

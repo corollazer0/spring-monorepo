@@ -9,6 +9,11 @@ dependencies {
 
     runtimeOnly 'com.h2database:h2' // 버전은 Boot 2.7 BOM이 관리
 
+    // JWT (심화 Step 10): 0.12.x는 API가 크게 바뀜 — Java 8 호환 안정판 0.11.5 고정
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
     testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:2.3.2' // @MybatisTest
     testImplementation 'org.springframework.security:spring-security-test'             // @WithMockUser, csrf() 등
 }

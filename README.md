@@ -28,6 +28,10 @@ Java 1.8 · Spring Boot 2.7.17 · Gradle 8.x · JUnit 5 · Lombok
 
 # 모듈 하나만 (예: TestCraft)
 .\gradlew :spring-test-onboarding:test
+
+# TestCraft 웹앱 실행 (Thymeleaf 화면)
+.\gradlew :spring-test-onboarding:bootRun
+# → http://localhost:8080/posts  (로그인: writer1 / spring123!)
 ```
 
 > 요구사항: JDK 8+ (JDK 11 권장). Gradle은 wrapper가 포함되어 있어 별도 설치 불필요.

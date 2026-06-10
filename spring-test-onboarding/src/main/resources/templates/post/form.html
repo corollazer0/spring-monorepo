@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('글쓰기')"></head>
+<body>
+<header th:replace="fragments/layout :: header"></header>
+
+<main>
+    <h1>글쓰기</h1>
+
+    <!--
+      th:object + th:field: DTO와 폼의 양방향 바인딩.
+      검증 실패로 폼이 재표시되면 입력값이 유지되고, th:errors가 필드별 메시지를 보여준다.
+      th:action은 CSRF hidden 필드를 자동 포함 — REST 테스트의 with(csrf())와 같은 역할을 한다.
+    -->
+    <form th:action="@{/posts}" th:object="${postCreateRequest}" method="post">
+        <label for="title">제목</label>
+        <input type="text" id="title" th:field="*{title}" placeholder="제목을 입력하세요">
+        <p class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">제목 에러</p>
+
+        <label for="content">내용</label>
+        <textarea id="content" rows="8" th:field="*{content}" placeholder="내용을 입력하세요"></textarea>
+        <p class="error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}">내용 에러</p>
+
+        <button type="submit">등록</button>
+        <a th:href="@{/posts}">취소</a>
+    </form>
+</main>
+</body>
+</html>

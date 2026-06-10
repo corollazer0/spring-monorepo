@@ -14,6 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -88,11 +89,17 @@ public class SecurityConfig {
     @Order(2) // v2가 아닌 모든 요청은 이 세션 체인이 담당한다
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // REST API이므로 미인증 시 로그인 페이지로 redirect(302) 대신 401 응답
+                // [Step 12] 한 인증, 두 클라이언트:
+                // - REST(/api/**) 미인증 → 401 (프로그램이 해석할 상태코드)
+                // - 화면(그 외) 미인증 → 로그인 페이지로 302 (사람이 따라갈 안내)
+                // 나머지 요청의 EntryPoint는 formLogin이 등록하는 LoginUrl(/login)이 담당한다
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                        .defaultAuthenticationEntryPointFor(
+                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                                new AntPathRequestMatcher("/api/**")))
 
                 // CSRF 토큰을 쿠키로 발급 (Step 8 E2E에서 사용). H2 콘솔은 예외
+                // Thymeleaf 폼(th:action)은 hidden 필드로 토큰을 자동 포함한다 (Step 12)
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .ignoringAntMatchers("/h2-console/**"))
@@ -101,25 +108,53 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions().sameOrigin())
 
                 .authorizeHttpRequests(auth -> auth
-                        .antMatchers("/h2-console/**", "/login", "/logout").permitAll()
+                        .antMatchers("/h2-console/**", "/login", "/logout", "/signup", "/css/**").permitAll()
                         .antMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/members").permitAll()
                         .antMatchers("/api/admin/**").hasRole("ADMIN")
+                        // 순서 주의! 글쓰기 화면은 아래 permitAll(GET /posts/**)보다 먼저 선언해야 한다
+                        .antMatchers("/posts/new").authenticated()
+                        .antMatchers(HttpMethod.GET, "/", "/posts/**").permitAll()
                         .anyRequest().authenticated())
 
-                // 세션 기반 폼로그인: POST /login (username, password 폼 파라미터)
-                // REST API이므로 성공/실패를 redirect(302) 대신 상태코드로 응답한다 (Step 8 E2E)
+                // 세션 기반 폼로그인. 응답도 클라이언트 종류에 따라 분기한다:
+                // - Accept: application/json (REST 테스트/외부 연동) → 200/401 상태코드
+                // - 브라우저 → /posts 로 redirect / /login?error 로 재안내
                 .formLogin(form -> form
-                        .loginProcessingUrl("/login")
-                        .successHandler((request, response, authentication) ->
-                                response.setStatus(HttpServletResponse.SC_OK))
-                        .failureHandler((request, response, exception) ->
-                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED)))
+                        .loginPage("/login")          // 커스텀 로그인 화면 (Step 12)
+                        .loginProcessingUrl("/login") // 인증 처리 URL (POST)
+                        .successHandler((request, response, authentication) -> {
+                            if (wantsJson(request)) {
+                                response.setStatus(HttpServletResponse.SC_OK);
+                            } else {
+                                response.sendRedirect("/posts");
+                            }
+                        })
+                        .failureHandler((request, response, exception) -> {
+                            if (wantsJson(request)) {
+                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            } else {
+                                response.sendRedirect("/login?error");
+                            }
+                        }))
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessHandler((request, response, authentication) ->
-                                response.setStatus(HttpServletResponse.SC_OK)));
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            if (wantsJson(request)) {
+                                response.setStatus(HttpServletResponse.SC_OK);
+                            } else {
+                                response.sendRedirect("/posts");
+                            }
+                        }));
 
         return http.build();
+    }
+
+    /**
+     * 클라이언트 구분: Accept 헤더에 application/json이 있으면 프로그램(REST), 아니면 브라우저로 본다.
+     */
+    private boolean wantsJson(javax.servlet.http.HttpServletRequest request) {
+        String accept = request.getHeader("Accept");
+        return accept != null && accept.contains("application/json");
     }
 }

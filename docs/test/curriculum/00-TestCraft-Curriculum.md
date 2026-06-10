@@ -3,7 +3,7 @@
 > **대상**: 테스트 코드를 한 번도 작성해본 적 없는 SpringBoot 초보 개발자
 > **목표**: 일주일(하루 1~2시간) 안에 Controller / Service / DAO / Filter / Interceptor / Security / Validation 전 영역에서
 > **스스로 테스트를 설계하고 작성할 수 있는 기본기**를 만든다.
-> **스택**: Java 1.8 · Spring Boot 2.7.17 · Spring Security · MyBatis(XML) · H2(MS-SQL 호환 모드) · JUnit5 · Mockito · AssertJ
+> **스택**: Java 1.8 · Spring Boot 2.7.17 · Spring Security · MyBatis(XML) · H2(MS-SQL 호환 모드) · Thymeleaf · JUnit5 · Mockito · AssertJ
 
 ---
 
@@ -39,6 +39,10 @@ Validation / Security / Filter
 ```bash
 # 레포 클론 후 모듈 테스트가 도는지 먼저 확인
 .\gradlew :spring-test-onboarding:test
+
+# 웹앱을 직접 띄워서 눈으로 보기 (Step 12에서 만든 화면)
+.\gradlew :spring-test-onboarding:bootRun
+# → http://localhost:8080/posts  (로그인: writer1 / spring123!)
 ```
 
 ### 2-2. Step 진행 루틴 (Step당 1~1.5시간)
@@ -76,6 +80,10 @@ Validation / Security / Filter
 | 7 | Filter & Interceptor 테스트 | 필터/인터셉터 그 자체는 따로 검증해야 한다 | `MockHttpServletRequest`, `MockFilterChain`, `preHandle` | 1h |
 | 8 | 통합/E2E: @SpringBootTest | 조각은 통과해도 전체가 한 몸으로 도는 증명이 없다 | `RANDOM_PORT`, `TestRestTemplate`, 세션 로그인 E2E, 테스트 피라미드 | 1.5h |
 | 9 | 캡스톤: 댓글 기능 테스트 설계 | 정답지 없이 스스로 테스트 전략을 세울 수 있는가 | 종합 (요구사항 → 테스트 케이스 도출 → 전 레이어 작성) | 2h |
+| 12* | View 테스트: Thymeleaf 화면 | API뿐 — 눈으로 볼 화면과 그 검증이 없다 | `view()`/`model()`/`content()` 렌더링 검증, EntryPoint 분기(401 vs 302), `@ModelAttribute`+`BindingResult`, PRG | 1.5h |
+
+> *Step 12는 나중에 추가되어 번호가 12이지만 **필수 코스**입니다.
+> **권장 학습 순서: Step 5(Validation)와 Step 6(Security) 사이** — Controller/검증을 배운 직후가 가장 효과적입니다.
 
 ### 심화 코스 (선택) — 필수 완주 후
 
@@ -129,7 +137,7 @@ Validation / Security / Filter
 
 ## 6. 완주 체크리스트
 
-- [ ] Step 1~8 의 모든 exercise를 통과시켰다
+- [ ] Step 1~8, 12 의 모든 exercise를 통과시켰다
 - [ ] Step 9 캡스톤에서 Comment 전 레이어 테스트를 스스로 작성했다
 - [ ] `.\gradlew :spring-test-onboarding:test` 가 그린이다
 - [ ] 새 기능을 맡았을 때 "무엇을 단위/슬라이스/통합으로 검증할지" 스스로 말할 수 있다

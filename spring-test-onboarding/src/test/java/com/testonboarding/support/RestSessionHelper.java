@@ -59,6 +59,8 @@ public class RestSessionHelper {
 
         HttpHeaders headers = baseHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        // REST 클라이언트임을 알린다 → 서버가 redirect(브라우저용) 대신 200/401 상태코드로 응답 (Step 12)
+        headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
 
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("username", username);

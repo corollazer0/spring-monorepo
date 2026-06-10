@@ -12,6 +12,7 @@
 | Service 판단 로직 (협력자 있음) | `@ExtendWith(MockitoExtension.class)` | 없음 (Mock 주입) | ms | Step 2 |
 | MyBatis SQL / 매핑 | `@MybatisTest` + `Replace.NONE` | MyBatis+DataSource | ~1s | Step 3 |
 | URL/JSON/상태코드/검증/보안 경계 | `@WebMvcTest` + `@Import(SecurityConfig)` | MVC 레이어 | ~2s | Step 4~6 |
+| 화면(SSR): 뷰 이름/모델/렌더링 HTML | `@WebMvcTest` + `view()`/`model()`/`content()` | MVC+Thymeleaf | ~2s | Step 12 |
 | Filter/Interceptor 내부 분기 | 서블릿 Mock 3총사 (new로 직접) | 없음 | ms | Step 7 |
 | 빈 연결 + 전체 흐름 (가짜 HTTP) | `@SpringBootTest` + `@AutoConfigureMockMvc` + `@Transactional` | 전부 | 수 초 | Step 8 |
 | 진짜 HTTP / 진짜 로그인 / 쿠키 | `@SpringBootTest(RANDOM_PORT)` + `TestRestTemplate` | 전부+Tomcat | 수 초+ | Step 8 |
@@ -64,6 +65,8 @@
 | 증상 | 1순위 의심 |
 |------|-----------|
 | permitAll인데 401 | @WebMvcTest에 `@Import(SecurityConfig)` 누락 (Step 4) |
+| 화면 미인증이 302가 아닌 401 | MockMvc에 `accept(TEXT_HTML)` 누락 — 브라우저로 인식 안 됨 (Step 12) |
+| 폼 검증 실패가 JSON 400으로 | `BindingResult` 파라미터 누락 (@Valid 바로 뒤!) (Step 12) |
 | 로그인했는데 403 | `with(csrf())` 누락 — CSRF가 인증보다 먼저 (Step 6) |
 | MS-SQL 문법이 H2에서 문법 오류 | `Replace.NONE` 누락 (Step 3) |
 | 한글 데이터가 ??? | 인코딩 — sql.init.encoding / compile encoding (Step 3) |

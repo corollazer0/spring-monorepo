@@ -4,6 +4,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+    // View (Step 12): SSR 템플릿 엔진 — jar 패키징 공식 지원, MockMvc 렌더링 검증 가능
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5' // sec:authorize
+
     // MyBatis: 3.x는 Boot 3 / Java 17 전용 → Boot 2.5~2.7 호환 최종판인 2.3.2 고정
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.3.2'
 

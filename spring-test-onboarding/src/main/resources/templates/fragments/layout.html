@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<!--
+  공통 프래그먼트 — 각 페이지가 th:replace로 가져다 쓴다.
+  head(title): 공통 메타/스타일, header: 상단 네비게이션(로그인 상태별 분기)
+-->
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <title th:text="${title} + ' - TestCraft'">TestCraft</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; max-width: 760px; margin: 24px auto; padding: 0 16px; color: #222; }
+        nav { display: flex; gap: 12px; align-items: center; }
+        nav .brand { font-weight: bold; text-decoration: none; color: #1a5fb4; margin-right: auto; }
+        nav form { display: inline; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; }
+        input[type=text], input[type=password], textarea { width: 100%; padding: 8px; margin: 4px 0 12px; box-sizing: border-box; }
+        button { padding: 8px 16px; cursor: pointer; }
+        .error { color: #c01c28; }
+        .info { color: #1a5fb4; }
+        .comment { border-top: 1px solid #eee; padding: 8px 0; }
+        .muted { color: #777; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+<header th:fragment="header">
+    <nav>
+        <a class="brand" th:href="@{/posts}">📝 TestCraft 게시판</a>
+        <!-- 로그인 상태: 글쓰기 + 사용자명 + 로그아웃 (sec: 네임스페이스 = thymeleaf-extras-springsecurity5) -->
+        <span sec:authorize="isAuthenticated()">
+            <a th:href="@{/posts/new}">글쓰기</a>
+            <b sec:authentication="name">user</b>님
+            <!-- 로그아웃은 상태 변경이므로 POST — th:action이 CSRF hidden 필드를 자동으로 넣어준다 -->
+            <form th:action="@{/logout}" method="post">
+                <button type="submit">로그아웃</button>
+            </form>
+        </span>
+        <!-- 비로그인 상태 -->
+        <span sec:authorize="!isAuthenticated()">
+            <a th:href="@{/login}">로그인</a>
+            <a th:href="@{/signup}">회원가입</a>
+        </span>
+    </nav>
+    <hr>
+</header>
+</body>
+</html>

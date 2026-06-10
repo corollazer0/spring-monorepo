@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('글 목록')"></head>
+<body>
+<header th:replace="fragments/layout :: header"></header>
+
+<main>
+    <h1>글 목록</h1>
+
+    <table>
+        <thead>
+        <tr>
+            <th>번호</th>
+            <th>제목</th>
+            <th>작성자</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="post : ${posts}">
+            <td th:text="${post.postId}">1</td>
+            <td><a th:href="@{/posts/{id}(id=${post.postId})}" th:text="${post.title}">제목</a></td>
+            <td th:text="${post.writer}">writer1</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(posts)}">
+            <td colspan="3" class="muted">게시글이 없습니다.</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p>
+        <a th:if="${page > 1}" th:href="@{/posts(page=${page - 1})}">← 이전</a>
+        <span th:text="'페이지 ' + ${page}">페이지 1</span>
+        <a th:href="@{/posts(page=${page + 1})}">다음 →</a>
+    </p>
+</main>
+</body>
+</html>

@@ -18,6 +18,10 @@
 - [x] Step 6: 캐싱 (@Cacheable + 무효화) — `64f5821`
 - [x] Step 7: 스케줄링 — 미결제 주문 정리 — `aa1bfcb`
 - [x] Step 8: Actuator — 운영의 눈 — `35b3465`
-- [x] Step 9: 캡스톤 — 배송 조회 연동 자율 설계 — (이번 커밋)
-- [ ] Step 10(심화): WebClient 또는 Resilience4j
-- [ ] CLAUDE.md 신규 / 초보자 README / 커리큘럼·FOR 문서
+- [x] Step 9: 캡스톤 — 배송 조회 연동 자율 설계 — `58f47d9`
+- [x] CLAUDE.md 신규 / 커리큘럼·FOR 문서 (Step 1~9, 각 Step 커밋에 포함)
+- [x] 초보자 README + 루트 README Web 행 ✅ + plan/task 마감 — (이번 커밋)
+
+## 차기 회차 (이월)
+
+- [ ] Step 10(심화): WebClient 또는 Resilience4j — plan.md Plan 2 구현 결과 참조

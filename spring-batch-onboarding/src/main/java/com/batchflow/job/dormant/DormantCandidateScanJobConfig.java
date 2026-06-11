@@ -1,6 +1,7 @@
 package com.batchflow.job.dormant;
 
 import com.batchflow.domain.Member;
+import com.batchflow.domain.MemberRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -14,10 +15,8 @@ import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuild
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.RowMapper;
 
 import javax.sql.DataSource;
-import java.sql.Timestamp;
 import java.util.stream.Collectors;
 
 /**
@@ -73,28 +72,9 @@ public class DormantCandidateScanJobConfig {
                         "WHERE status = 'ACTIVE' AND last_login_at < ? " +
                         "ORDER BY member_id") // 결정적 순서 — 검증과 재시작의 전제
                 .preparedStatementSetter(ps -> ps.setString(1, cutoffDate))
-                .rowMapper(memberRowMapper())
+                .rowMapper(new MemberRowMapper()) // 공용 RowMapper (Step 8 페이징 리더와 재사용)
                 .fetchSize(100) // DB가 한 번에 건네주는 묶음 크기 (메모리 상한)
                 .build();
-    }
-
-    /**
-     * RowMapper — ResultSet 한 행을 Member로. (MyBatis 없이 JDBC 그대로 — 배치 리더의 기본기)
-     */
-    @Bean
-    public RowMapper<Member> memberRowMapper() {
-        return (rs, rowNum) -> {
-            Timestamp lastLogin = rs.getTimestamp("last_login_at");
-            Timestamp dormantAt = rs.getTimestamp("dormant_at");
-            return Member.builder()
-                    .memberId(rs.getLong("member_id"))
-                    .name(rs.getString("name"))
-                    .email(rs.getString("email"))
-                    .status(rs.getString("status"))
-                    .lastLoginAt(lastLogin == null ? null : lastLogin.toLocalDateTime())
-                    .dormantAt(dormantAt == null ? null : dormantAt.toLocalDateTime())
-                    .build();
-        };
     }
 
     @Bean

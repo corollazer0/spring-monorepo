@@ -2,6 +2,7 @@ package com.batchflow.step10.answer;
 
 import com.batchflow.config.TestBatchConfig;
 import com.batchflow.job.dormant.DormantMemberJobConfig;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,15 @@ class DormantJobSideEffectAnswerTest {
     @BeforeEach
     void setUp() {
         jobRepositoryTestUtils.removeJobExecutions();
+        restoreMembers();
+    }
+
+    @AfterEach
+    void tearDown() {
+        restoreMembers(); // 내가 어지럽힌 것은 내가 치운다 — 다른 클래스의 출발선 보호
+    }
+
+    private void restoreMembers() {
         // (TODO 1 답) chunk 커밋은 테스트가 끝나도 남는다 — 시드 상태로 직접 복구.
         // 안 하면 앞 테스트의 전환 결과가 다음 테스트의 출발선을 오염시킨다
         jdbcTemplate.update(

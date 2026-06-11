@@ -44,15 +44,19 @@ class RestartLedgerAnswerTest {
     @BeforeEach
     void setUp() {
         jobRepositoryTestUtils.removeJobExecutions();
-        // (TODO 1 답)
-        jdbcTemplate.update("UPDATE member SET status = 'ACTIVE', dormant_at = NULL " +
-                "WHERE member_id BETWEEN 21 AND 30");
+        restoreMembers(); // (TODO 1 답)
         SabotageProcessor.SABOTAGE_ON.set(false);
     }
 
     @AfterEach
     void tearDown() {
         SabotageProcessor.SABOTAGE_ON.set(false);
+        restoreMembers(); // 내가 어지럽힌 것은 내가 치운다
+    }
+
+    private void restoreMembers() {
+        jdbcTemplate.update("UPDATE member SET status = 'ACTIVE', dormant_at = NULL " +
+                "WHERE member_id BETWEEN 21 AND 30");
     }
 
     @Test

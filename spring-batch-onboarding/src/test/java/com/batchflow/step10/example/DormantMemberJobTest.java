@@ -2,6 +2,7 @@ package com.batchflow.step10.example;
 
 import com.batchflow.config.TestBatchConfig;
 import com.batchflow.job.dormant.DormantMemberJobConfig;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,7 +51,17 @@ class DormantMemberJobTest {
     @BeforeEach
     void setUp() {
         jobRepositoryTestUtils.removeJobExecutions();
-        // 🚨 배치는 진짜 커밋한다 — 이전 테스트의 전환 결과를 원상복구 (시드 상태로)
+        restoreMembers(); // 방어적 복구 (앞 클래스가 어지럽혔을 경우 대비)
+    }
+
+    /** 내가 어지럽힌 것은 내가 치운다 — 다른 테스트 클래스의 출발선을 지키는 책임 */
+    @AfterEach
+    void tearDown() {
+        restoreMembers();
+    }
+
+    private void restoreMembers() {
+        // 🚨 배치는 진짜 커밋한다 — 전환 결과를 시드 상태로 원상복구
         jdbcTemplate.update(
                 "UPDATE member SET status = 'ACTIVE', dormant_at = NULL " +
                         "WHERE member_id BETWEEN 21 AND 30");

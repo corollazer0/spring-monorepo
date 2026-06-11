@@ -3,6 +3,7 @@ package com.webflow.product.service;
 import com.webflow.common.dto.PageResponse;
 import com.webflow.common.exception.ProductNotFoundException;
 import com.webflow.common.exception.StoredFileNotFoundException;
+import com.webflow.config.CacheConfig;
 import com.webflow.file.FileStorageService;
 import com.webflow.product.dao.ProductDao;
 import com.webflow.product.domain.Product;
@@ -11,6 +12,8 @@ import com.webflow.product.dto.ProductResponse;
 import com.webflow.product.dto.ProductSearchCondition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,7 +39,14 @@ public class ProductService {
     private final ProductDao productDao;
     private final FileStorageService fileStorageService;
 
+    /**
+     * 단건 조회 — 캐시 적용 (Step 6).
+     * 같은 productId의 두 번째 조회부터는 이 메서드 본문이 "실행되지 않는다" (DB 0회).
+     * 예외(없는 상품)는 캐시되지 않는다 — 다음 조회도 DB로 간다.
+     */
+    @Cacheable(cacheNames = CacheConfig.PRODUCTS, key = "#productId")
     public ProductResponse getProduct(Long productId) {
+        log.debug(">>>>> [DEBUG] 캐시 미스 — DB 조회. productId={}", productId);
         return ProductResponse.from(findProductOrThrow(productId));
     }
 
@@ -78,7 +88,9 @@ public class ProductService {
     /**
      * 상품 이미지 업로드 (Step 5) — 검증·저장은 FileStorageService, 경로 기록은 여기서.
      * 순서 주의: 상품 존재 확인이 먼저다 — 없는 상품 때문에 고아 파일을 만들지 않는다.
+     * 상품이 바뀌었으니 캐시도 비운다 (Step 6) — 무효화 없는 캐시는 거짓말 제조기.
      */
+    @CacheEvict(cacheNames = CacheConfig.PRODUCTS, key = "#productId")
     public String uploadProductImage(Long productId, MultipartFile file) {
         findProductOrThrow(productId);
         String storedName = fileStorageService.store(file);

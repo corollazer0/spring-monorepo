@@ -14,8 +14,10 @@ import com.webflow.order.dto.OrderCreateRequest;
 import com.webflow.order.dto.OrderResponse;
 import com.webflow.product.dao.ProductDao;
 import com.webflow.product.domain.Product;
+import com.webflow.config.CacheConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,8 +50,12 @@ public class OrderService {
     /**
      * @Transactional: 재고 차감과 주문 INSERT는 한 운명 —
      * INSERT가 실패하면 차감도 함께 롤백되어야 재고가 새지 않는다.
+     *
+     * @CacheEvict (Step 6): 주문은 재고를 바꾼다 — 상품 캐시를 안 비우면
+     * 품절 상품이 "재고 있음"으로 보이는 거짓말이 캐시 수명만큼 지속된다.
      */
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.PRODUCTS, key = "#request.productId")
     public OrderResponse placeOrder(OrderCreateRequest request) {
         Product product = productDao.findById(request.getProductId());
         if (product == null) {

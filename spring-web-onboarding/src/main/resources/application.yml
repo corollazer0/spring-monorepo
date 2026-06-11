@@ -27,6 +27,10 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
 
+# 파일 업로드 (Step 5)
+app:
+  upload-dir: ./uploads   # 테스트에선 @TempDir/build 경로로 갈아끼운다
+
 # 외부 연동 설정 (Step 3~)
 external:
   payment:

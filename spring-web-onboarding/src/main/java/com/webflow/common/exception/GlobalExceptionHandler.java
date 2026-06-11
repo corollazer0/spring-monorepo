@@ -41,6 +41,12 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
+    @ExceptionHandler(StoredFileNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleStoredFileNotFound(StoredFileNotFoundException e) {
+        log.warn(">>>>> [WARN] 파일 없음: {}", e.getMessage());
+        return errorResponse(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
     @ExceptionHandler(OutOfStockException.class)
     public ResponseEntity<ErrorResponse> handleOutOfStock(OutOfStockException e) {
         log.warn(">>>>> [WARN] 재고 부족: {}", e.getMessage());

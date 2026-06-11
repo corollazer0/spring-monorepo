@@ -58,6 +58,12 @@
         affected = 0 이면 차감 실패 — SELECT 후 UPDATE 두 문장으로 나누면
         그 사이에 다른 요청이 끼어들어 재고가 음수가 될 수 있다!
     -->
+    <update id="updateImagePath">
+        UPDATE product
+        SET image_path = #{imagePath}
+        WHERE product_id = #{productId}
+    </update>
+
     <update id="decreaseStock">
         UPDATE product
         SET stock = stock - #{quantity}

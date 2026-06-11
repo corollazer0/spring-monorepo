@@ -2,6 +2,8 @@ package com.webflow.product.service;
 
 import com.webflow.common.dto.PageResponse;
 import com.webflow.common.exception.ProductNotFoundException;
+import com.webflow.common.exception.StoredFileNotFoundException;
+import com.webflow.file.FileStorageService;
 import com.webflow.product.dao.ProductDao;
 import com.webflow.product.domain.Product;
 import com.webflow.product.dto.ProductCreateRequest;
@@ -9,7 +11,9 @@ import com.webflow.product.dto.ProductResponse;
 import com.webflow.product.dto.ProductSearchCondition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -30,6 +34,7 @@ public class ProductService {
             new HashSet<>(Arrays.asList("recent", "priceAsc", "priceDesc", "name"));
 
     private final ProductDao productDao;
+    private final FileStorageService fileStorageService;
 
     public ProductResponse getProduct(Long productId) {
         return ProductResponse.from(findProductOrThrow(productId));
@@ -68,6 +73,27 @@ public class ProductService {
         productDao.insert(product);
         log.info(">>>>> [ProductService] 상품 등록 완료. productId={}", product.getProductId());
         return product.getProductId();
+    }
+
+    /**
+     * 상품 이미지 업로드 (Step 5) — 검증·저장은 FileStorageService, 경로 기록은 여기서.
+     * 순서 주의: 상품 존재 확인이 먼저다 — 없는 상품 때문에 고아 파일을 만들지 않는다.
+     */
+    public String uploadProductImage(Long productId, MultipartFile file) {
+        findProductOrThrow(productId);
+        String storedName = fileStorageService.store(file);
+        productDao.updateImagePath(productId, storedName);
+        log.info(">>>>> [ProductService] 이미지 등록. productId={}, imagePath={}", productId, storedName);
+        return storedName;
+    }
+
+    /** 상품 이미지 다운로드 (Step 5) */
+    public Resource getProductImage(Long productId) {
+        Product product = findProductOrThrow(productId);
+        if (product.getImagePath() == null) {
+            throw new StoredFileNotFoundException("등록된 이미지가 없습니다. productId=" + productId);
+        }
+        return fileStorageService.loadAsResource(product.getImagePath());
     }
 
     private Product findProductOrThrow(Long productId) {

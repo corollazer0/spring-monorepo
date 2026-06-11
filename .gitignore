@@ -42,3 +42,5 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+### WebFlow upload (Step 5: bootRun artifacts) ###
+uploads/

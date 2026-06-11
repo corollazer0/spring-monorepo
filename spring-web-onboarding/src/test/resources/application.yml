@@ -21,6 +21,9 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
 
+app:
+  upload-dir: build/test-uploads   # 테스트가 디스크 어디를 더럽히는지 명시적으로
+
 external:
   payment:
     base-url: https://pg.example.com   # 진짜 호출은 없다 — MockRestServiceServer가 가로챈다

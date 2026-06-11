@@ -32,4 +32,7 @@ public interface ProductDao {
      * @return 영향받은 행 수 — 0이면 재고 부족(또는 없는 상품)으로 차감 실패!
      */
     int decreaseStock(@Param("productId") Long productId, @Param("quantity") int quantity);
+
+    /** 이미지 경로 갱신 (Step 5) */
+    int updateImagePath(@Param("productId") Long productId, @Param("imagePath") String imagePath);
 }

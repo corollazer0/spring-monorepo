@@ -1,8 +1,11 @@
 package com.webflow.product.dao;
 
 import com.webflow.product.domain.Product;
+import com.webflow.product.dto.ProductSearchCondition;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * 상품 DAO — 구현은 resources/mybatis/mapper/ProductMapper.xml
@@ -13,6 +16,14 @@ public interface ProductDao {
     Product findById(Long productId);
 
     void insert(Product product);
+
+    /** 동적 검색 + 화이트리스트 정렬 + MS-SQL 페이징 (Step 2) */
+    List<Product> search(@Param("condition") ProductSearchCondition condition,
+                         @Param("offset") int offset,
+                         @Param("size") int size);
+
+    /** search와 같은 WHERE의 전체 건수 — PageResponse의 totalCount */
+    long countBySearch(@Param("condition") ProductSearchCondition condition);
 
     /**
      * 재고 차감 — WHERE stock >= 수량 조건으로 "확인과 차감"을 한 문장에:

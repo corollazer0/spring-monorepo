@@ -12,6 +12,42 @@
         WHERE product_id = #{productId}
     </select>
 
+    <!-- 검색 WHERE — search와 countBySearch가 "반드시 같은 조건"을 쓰도록 조각으로 공유 -->
+    <sql id="searchWhere">
+        <where>
+            <if test="condition.keyword != null and condition.keyword != ''">
+                AND name LIKE CONCAT('%', #{condition.keyword}, '%')
+            </if>
+            <if test="condition.category != null and condition.category != ''">
+                AND category = #{condition.category}
+            </if>
+        </where>
+    </sql>
+
+    <!--
+        🔒 정렬 화이트리스트: 사용자 입력(sort 키)을 ORDER BY에 "직접" 넣지 않는다!
+        ${}로 꽂으면 SQL 인젝션 — <choose>로 고정된 SQL 조각 중에서 "선택"만 한다.
+        모든 정렬에 PK(product_id)를 포함 — 동률 정렬은 페이징을 흔든다 (TestCraft Step 3 교훈).
+    -->
+    <select id="search" resultType="Product">
+        SELECT <include refid="productColumns"/>
+        FROM product
+        <include refid="searchWhere"/>
+        <choose>
+            <when test="condition.sort == 'priceAsc'">ORDER BY price ASC, product_id ASC</when>
+            <when test="condition.sort == 'priceDesc'">ORDER BY price DESC, product_id ASC</when>
+            <when test="condition.sort == 'name'">ORDER BY name ASC, product_id ASC</when>
+            <otherwise>ORDER BY product_id DESC</otherwise> <!-- recent: 최신 등록순 -->
+        </choose>
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+    </select>
+
+    <select id="countBySearch" resultType="long">
+        SELECT COUNT(*)
+        FROM product
+        <include refid="searchWhere"/>
+    </select>
+
     <insert id="insert" useGeneratedKeys="true" keyProperty="productId">
         INSERT INTO product (name, category, price, stock)
         VALUES (#{name}, #{category}, #{price}, #{stock})

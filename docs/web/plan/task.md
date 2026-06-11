@@ -17,7 +17,7 @@
 - [x] Step 5: 파일 업로드/다운로드 — `f811b76`
 - [x] Step 6: 캐싱 (@Cacheable + 무효화) — `64f5821`
 - [x] Step 7: 스케줄링 — 미결제 주문 정리 — `aa1bfcb`
-- [x] Step 8: Actuator — 운영의 눈 — (이번 커밋)
-- [ ] Step 9: 캡스톤 — 배송 조회 연동 자율 설계
+- [x] Step 8: Actuator — 운영의 눈 — `35b3465`
+- [x] Step 9: 캡스톤 — 배송 조회 연동 자율 설계 — (이번 커밋)
 - [ ] Step 10(심화): WebClient 또는 Resilience4j
 - [ ] CLAUDE.md 신규 / 초보자 README / 커리큘럼·FOR 문서

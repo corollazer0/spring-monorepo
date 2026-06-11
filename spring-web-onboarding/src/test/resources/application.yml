@@ -34,6 +34,10 @@ external:
     base-url: https://pg.example.com   # 진짜 호출은 없다 — MockRestServiceServer가 가로챈다
     connect-timeout-millis: 3000
     read-timeout-millis: 5000
+  delivery:
+    base-url: https://delivery.example.com
+    connect-timeout-millis: 3000
+    read-timeout-millis: 5000
 
 management:
   endpoints:

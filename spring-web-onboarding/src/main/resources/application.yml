@@ -42,6 +42,11 @@ external:
     # 타임아웃 (Step 4): 없으면 PG 장애 = 우리 스레드 풀 고갈 = 전면 장애!
     connect-timeout-millis: 3000   # 연결 수립까지
     read-timeout-millis: 5000      # 연결 후 첫 응답까지
+  # 배송사 (Step 9 캡스톤)
+  delivery:
+    base-url: https://delivery.example.com
+    connect-timeout-millis: 3000
+    read-timeout-millis: 5000
 
 # Actuator (Step 8) — 노출은 "필요한 것만" 골라서!
 # env/beans/configprops 등은 내부 설정·구조를 통째로 드러낸다 (기본 비노출 유지)

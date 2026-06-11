@@ -23,6 +23,11 @@ mybatis:
 
 app:
   upload-dir: build/test-uploads   # 테스트가 디스크 어디를 더럽히는지 명시적으로
+  scheduling:
+    enabled: false                 # 테스트 중 배경 정리 작업 금지 — 로직은 직접 호출로 검증
+  order:
+    stale-minutes: 30
+    cleanup-interval-millis: 600000
 
 external:
   payment:

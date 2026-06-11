@@ -17,6 +17,15 @@
         VALUES (#{productId}, #{quantity}, #{totalPrice}, #{status})
     </insert>
 
+    <!-- 정리 대상 조회 (Step 7): 상태와 시각 두 조건 — PAID/CANCELLED는 건드리지 않는다! -->
+    <select id="findStaleOrders" resultType="Order">
+        SELECT <include refid="orderColumns"/>
+        FROM orders
+        WHERE status = 'PENDING_PAYMENT'
+          AND ordered_at &lt; #{cutoff}
+        ORDER BY order_id
+    </select>
+
     <update id="updateStatus">
         UPDATE orders
         SET status = #{status},

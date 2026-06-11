@@ -15,8 +15,8 @@
 - [x] Step 3: 외부 결제 API 연동 기초 (MockRestServiceServer) — `e496b27`
 - [x] Step 4: 타임아웃·재시도·장애 격리 — `d7c02fb`
 - [x] Step 5: 파일 업로드/다운로드 — `f811b76`
-- [x] Step 6: 캐싱 (@Cacheable + 무효화) — (이번 커밋)
-- [ ] Step 7: 스케줄링 — 미결제 주문 정리
+- [x] Step 6: 캐싱 (@Cacheable + 무효화) — `64f5821`
+- [x] Step 7: 스케줄링 — 미결제 주문 정리 — (이번 커밋)
 - [ ] Step 8: Actuator — 운영의 눈
 - [ ] Step 9: 캡스톤 — 배송 조회 연동 자율 설계
 - [ ] Step 10(심화): WebClient 또는 Resilience4j

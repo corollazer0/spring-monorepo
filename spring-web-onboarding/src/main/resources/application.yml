@@ -30,6 +30,10 @@ mybatis:
 # 파일 업로드 (Step 5)
 app:
   upload-dir: ./uploads   # 테스트에선 @TempDir/build 경로로 갈아끼운다
+  # 미결제 주문 정리 (Step 7)
+  order:
+    stale-minutes: 30                  # 이 시간 넘게 미결제면 취소 + 재고 복원
+    cleanup-interval-millis: 600000    # 10분마다 (fixedDelay — 종료 기준이라 겹치지 않음)
 
 # 외부 연동 설정 (Step 3~)
 external:

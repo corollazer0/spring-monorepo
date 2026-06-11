@@ -35,4 +35,7 @@ public interface ProductDao {
 
     /** 이미지 경로 갱신 (Step 5) */
     int updateImagePath(@Param("productId") Long productId, @Param("imagePath") String imagePath);
+
+    /** 재고 복원 (Step 7) — 미결제 주문 취소 시 차감분을 되돌린다 */
+    int restoreStock(@Param("productId") Long productId, @Param("quantity") int quantity);
 }

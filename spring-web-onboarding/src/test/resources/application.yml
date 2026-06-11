@@ -35,6 +35,15 @@ external:
     connect-timeout-millis: 3000
     read-timeout-millis: 5000
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
 logging:
   level:
     com.webflow: DEBUG

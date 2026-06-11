@@ -43,6 +43,17 @@ external:
     connect-timeout-millis: 3000   # 연결 수립까지
     read-timeout-millis: 5000      # 연결 후 첫 응답까지
 
+# Actuator (Step 8) — 노출은 "필요한 것만" 골라서!
+# env/beans/configprops 등은 내부 설정·구조를 통째로 드러낸다 (기본 비노출 유지)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always   # 학습용 — 인증 있는 실무에선 when-authorized 권장
+
 # 로깅 설정
 logging:
   level:

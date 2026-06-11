@@ -3,6 +3,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-cache' // 캐싱 (Step 6)
+    implementation 'org.springframework.boot:spring-boot-starter-actuator' // 운영의 눈 (Step 8)
 
     // MyBatis: 3.x는 Boot 3 / Java 17 전용 → Boot 2.5~2.7 호환 최종판 2.3.2 (TestCraft와 동일)
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.3.2'

@@ -1,515 +1,154 @@
-# FOR-BatchFlow-Step02: 첫 번째 Job 생성 - Hello Batch
+# [Batch Step 2] Hello Job — Job/Step/Tasklet 해부
 
-> Job, Step, Tasklet의 기본 구조를 이해하고, 가장 간단한 배치 작업을 구현합니다.
-
----
-
-## 🎬 Before We Start
-
-"자, 이제 공장 설비(Step 1)는 다 갖췄으니, 실제로 요리를 만들어 볼까요?"
-
-Step 1에서 Spring Batch의 인프라를 구축했다면, 이제는 **실제로 동작하는 배치 작업**을 만들어야 합니다.
-
-**비유로 이해하기:**
-- **Job** = 하나의 요리 레시피 (예: 김치찌개 만들기)
-- **Step** = 레시피의 각 단계 (1. 재료 손질, 2. 볶기, 3. 끓이기)
-- **Tasklet** = 각 단계에서 수행하는 구체적인 작업 (파를 송송 썰기)
-
-Spring Batch의 기본 단위는 이 3개입니다. 이번 Step에서는 가장 간단한 형태의 Job을 만들어서, **"Hello, Spring Batch!"**를 출력하는 작업을 해볼 거예요.
-
-"뭐야, 그냥 로그 찍는 거잖아?" 라고 생각할 수 있지만, **이게 배치 작업의 기본 뼈대**입니다. 이 구조를 이해하면, 나중에 1억 건의 데이터를 처리하는 복잡한 Job도 만들 수 있어요.
+> **소요 시간**: 약 1시간
+> **이번 Step의 도구**: `JobBuilderFactory`/`StepBuilderFactory`(4.x), Tasklet, `RepeatStatus`, `@SpringBatchTest`, `JobLauncherTestUtils`, `removeJobExecutions()`
+> **코드 위치**: `spring-batch-onboarding/src/{main/java/com/batchflow/job/hello, test/java/com/batchflow/step02}/`
 
 ---
 
-## 🏗️ What We're Building
+## 1. Before We Start — 판은 깔렸는데 Job이 없다
 
-### Step 2에서 구현할 것
-
-```
-┌───────────────────────────────────────────────────────────────┐
-│                  HelloJob 구조                                 │
-├───────────────────────────────────────────────────────────────┤
-│                                                                │
-│  HelloJobConfig.java                                           │
-│  ├─ Job: helloJob                                              │
-│  │   └─ Step: helloStep                                        │
-│  │       └─ Tasklet: 로그 출력 작업                            │
-│  │                                                             │
-│  └─ 실행 결과:                                                  │
-│      >>>>> Hello, Spring Batch!                                │
-│      >>>>> Step 실행 완료                                       │
-│                                                                │
-└───────────────────────────────────────────────────────────────┘
-
-흐름:
-1. JobBuilderFactory로 Job 생성 (helloJob)
-2. StepBuilderFactory로 Step 생성 (helloStep)
-3. Tasklet에서 로그 출력
-4. RepeatStatus.FINISHED 반환 → Step 종료
-5. Job 완료
-```
-
----
-
-## 🧠 Core Concepts
-
-### 1. Job, Step, Tasklet의 관계
+Step 1에서 장부 시스템을 확인했습니다. 이제 거기에 기록될 **첫 실행**을 만들 차례입니다.
+가장 작은 배치는 세 층으로 이루어집니다.
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                      Job (요리 레시피)                   │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │  Step 1 (재료 손질)                               │  │
-│  │  ├─ Tasklet: 양파 썰기                            │  │
-│  │  └─ Tasklet: 고기 양념하기                        │  │
-│  └───────────────────────────────────────────────────┘  │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │  Step 2 (볶기)                                     │  │
-│  │  └─ Tasklet: 재료 볶기                            │  │
-│  └───────────────────────────────────────────────────┘  │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │  Step 3 (끓이기)                                   │  │
-│  │  └─ Tasklet: 찌개 끓이기                          │  │
-│  └───────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────┘
+Job      "오늘 밤의 실행 단위"        ─ 예: 일일 정산
+ └─ Step   "그 안의 작업 단계"        ─ 예: 1)집계 2)저장 3)알림
+     └─ Tasklet  "실제 코드 한 덩이"   ─ 예: 로그 한 줄, 파일 삭제, 단순 UPDATE
 ```
 
-**핵심 포인트:**
-- **Job**: 배치 작업의 최상위 단위. 하나의 완전한 작업 흐름
-- **Step**: Job을 구성하는 독립적인 단계. 각 Step은 독립적으로 실행 가능
-- **Tasklet**: Step 내에서 수행되는 단순 작업. `execute()` 메서드 한 번 실행
+회사 업무에 비유하면 Job은 "프로젝트", Step은 "업무 단계", Tasklet은 "실제 손을 움직이는 일"입니다.
+Tasklet은 단순 작업용이고, 대량 데이터 처리는 Chunk(Step 6)가 맡습니다 — 지금은 구조에 집중하세요.
 
-### 2. JobBuilderFactory와 StepBuilderFactory
-
-```java
-@Configuration
-@RequiredArgsConstructor
-public class HelloJobConfig {
-
-    // Spring Batch가 자동으로 주입해주는 Factory들
-    private final JobBuilderFactory jobBuilderFactory;
-    private final StepBuilderFactory stepBuilderFactory;
-
-    @Bean
-    public Job helloJob() {
-        return jobBuilderFactory
-                .get("helloJob")      // Job 이름 지정 (필수!)
-                .start(helloStep())   // 첫 번째 Step 지정
-                .build();
-    }
-
-    @Bean
-    public Step helloStep() {
-        return stepBuilderFactory
-                .get("helloStep")     // Step 이름 지정 (필수!)
-                .tasklet((contribution, chunkContext) -> {
-                    // 이 부분이 실제로 실행되는 코드
-                    log.info(">>>>> Hello, Spring Batch!");
-                    return RepeatStatus.FINISHED;  // Step 종료
-                })
-                .build();
-    }
-}
-```
-
-**비유로 이해하기:**
-- `jobBuilderFactory.get("helloJob")` = "김치찌개 레시피"라는 이름의 빈 레시피 양식을 가져옴
-- `.start(helloStep())` = 레시피의 첫 번째 단계를 지정 ("재료 손질부터 시작")
-- `stepBuilderFactory.get("helloStep")` = "재료 손질"이라는 이름의 작업 단계 양식을 가져옴
-- `.tasklet(...)` = 이 단계에서 수행할 구체적인 작업 내용을 작성
-
-### 3. RepeatStatus의 의미
-
-```java
-return RepeatStatus.FINISHED;  // "이 작업 끝났어요, 다음으로 넘어가세요"
-```
-
-**RepeatStatus 종류:**
-- `FINISHED`: Tasklet 종료. Step 완료
-- `CONTINUABLE`: Tasklet 계속 반복 (같은 Tasklet을 다시 실행)
-
-**실제 예시:**
-
-```java
-// FINISHED 예시 (일반적인 경우)
-.tasklet((contribution, chunkContext) -> {
-    log.info(">>>>> 데이터 처리 완료");
-    return RepeatStatus.FINISHED;  // 한 번만 실행하고 종료
-})
-
-// CONTINUABLE 예시 (특수한 경우)
-private int count = 0;
-
-.tasklet((contribution, chunkContext) -> {
-    count++;
-    log.info(">>>>> 반복 실행 중: {}", count);
-
-    if (count < 5) {
-        return RepeatStatus.CONTINUABLE;  // 계속 반복
-    } else {
-        return RepeatStatus.FINISHED;     // 5번 반복 후 종료
-    }
-})
-```
-
-> **주의:** 대부분의 경우 `RepeatStatus.FINISHED`를 사용합니다. `CONTINUABLE`은 특수한 경우에만 사용하세요.
-
----
-
-## 💻 Step-by-Step Implementation
-
-### Step 1: HelloJobConfig 클래스 생성
-
-**파일 위치:** `src/main/java/com/batchflow/job/hello/HelloJobConfig.java`
-
-```java
-package com.batchflow.job.hello;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-@Slf4j                       // Lombok: log 객체 자동 생성
-@Configuration               // Spring: 이 클래스는 설정 클래스입니다
-@RequiredArgsConstructor     // Lombok: final 필드의 생성자 자동 생성
-public class HelloJobConfig {
-
-    private final JobBuilderFactory jobBuilderFactory;
-    private final StepBuilderFactory stepBuilderFactory;
-
-    @Bean
-    public Job helloJob() {
-        return jobBuilderFactory.get("helloJob")
-                .start(helloStep())
-                .build();
-    }
-
-    @Bean
-    public Step helloStep() {
-        return stepBuilderFactory.get("helloStep")
-                .tasklet((contribution, chunkContext) -> {
-                    log.info(">>>>> Hello, Spring Batch!");
-                    log.info(">>>>> Step 실행 완료");
-                    return RepeatStatus.FINISHED;
-                })
-                .build();
-    }
-}
-```
-
-**코드 설명:**
-1. `@Slf4j`: Lombok이 자동으로 `log` 객체를 생성 (로그 출력용)
-2. `@Configuration`: Spring에게 "이 클래스는 Bean 설정 클래스입니다"라고 알림
-3. `@RequiredArgsConstructor`: final 필드의 생성자를 자동 생성 (DI 주입)
-4. `jobBuilderFactory.get("helloJob")`: "helloJob"이라는 이름의 Job 생성 시작
-5. `.start(helloStep())`: helloStep을 첫 번째 Step으로 지정
-6. `stepBuilderFactory.get("helloStep")`: "helloStep"이라는 이름의 Step 생성 시작
-7. `.tasklet(...)`: Tasklet 로직 구현 (람다 표현식 사용)
-
-### Step 2: 테스트 설정 클래스 생성
-
-**파일 위치:** `src/test/java/com/batchflow/config/TestBatchConfig.java`
-
-```java
-package com.batchflow.config;
-
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-@EnableBatchProcessing    // 테스트 환경에서도 Batch 기능 활성화
-@EnableAutoConfiguration  // 테스트 환경 자동 구성
-public class TestBatchConfig {
-    // 별도의 Bean 정의 없이 어노테이션만으로 충분
-}
-```
-
-### Step 3: 테스트 코드 작성
-
-**파일 위치:** `src/test/java/com/batchflow/job/hello/HelloJobConfigTest.java`
-
-```java
-package com.batchflow.job.hello;
-
-import com.batchflow.config.TestBatchConfig;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.test.JobLauncherTestUtils;
-import org.springframework.batch.test.JobRepositoryTestUtils;
-import org.springframework.batch.test.context.SpringBatchTest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-@SpringBatchTest  // Spring Batch 테스트 지원
-@SpringBootTest(classes = {HelloJobConfig.class, TestBatchConfig.class})
-class HelloJobConfigTest {
-
-    @Autowired
-    private JobLauncherTestUtils jobLauncherTestUtils;
-
-    @Autowired
-    private JobRepositoryTestUtils jobRepositoryTestUtils;
-
-    @BeforeEach
-    void setUp() {
-        // 각 테스트 전에 이전 Job 실행 기록 삭제
-        jobRepositoryTestUtils.removeJobExecutions();
-    }
-
-    @Test
-    void helloJob_실행_성공() throws Exception {
-        // when: Job 실행
-        JobExecution jobExecution = jobLauncherTestUtils.launchJob();
-
-        // then: 실행 결과 검증
-        assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
-        assertThat(jobExecution.getExitStatus().getExitCode()).isEqualTo("COMPLETED");
-    }
-
-    @Test
-    void helloStep_단독실행_성공() throws Exception {
-        // when: 특정 Step만 실행
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("helloStep");
-
-        // then
-        assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
-    }
-}
-```
-
-**테스트 코드 설명:**
-- `@SpringBatchTest`: Spring Batch 테스트 유틸리티 자동 주입
-- `JobLauncherTestUtils`: Job을 쉽게 실행할 수 있는 테스트 도구
-- `JobRepositoryTestUtils`: Job 실행 기록을 관리하는 테스트 도구
-- `removeJobExecutions()`: 이전 실행 기록 삭제 (테스트 격리)
-
----
-
-## 🧪 Testing
-
-### 테스트 실행
-
-```bash
-./gradlew :spring-batch-onboarding:test --tests HelloJobConfigTest
-```
-
-### 실행 결과
+## 2. What We're Building
 
 ```
-> Task :spring-batch-onboarding:test
-
-2026-01-27 21:42:30 INFO  --- [main] o.s.b.c.l.support.SimpleJobLauncher      : Job: [SimpleJob: [name=helloJob]] launched with the following parameters: [{}]
-2026-01-27 21:42:30 INFO  --- [main] o.s.batch.core.job.SimpleStepHandler     : Executing step: [helloStep]
-2026-01-27 21:42:30 INFO  --- [main] c.b.job.hello.HelloJobConfig             : >>>>> Hello, Spring Batch!
-2026-01-27 21:42:30 INFO  --- [main] c.b.job.hello.HelloJobConfig             : >>>>> Step 실행 완료
-2026-01-27 21:42:30 INFO  --- [main] o.s.b.c.l.support.SimpleJobLauncher      : Job: [SimpleJob: [name=helloJob]] completed with the following parameters: [{}] and the following status: [COMPLETED]
-
-BUILD SUCCESSFUL in 50s
+src/main/java/com/batchflow/job/hello/HelloJobConfig.java   ← helloJob = helloStep 1개
+src/test/java/com/batchflow/step02/
+├── example/HelloJobTest.java          ← 실행 + Step 단독 실행 + 장부 기록 확인
+├── exercise/HelloJobExerciseTest.java
+└── answer/HelloJobAnswerTest.java
 ```
 
-**로그 분석:**
-1. `Job: [SimpleJob: [name=helloJob]] launched` → Job 시작
-2. `Executing step: [helloStep]` → Step 실행 시작
-3. `>>>>> Hello, Spring Batch!` → 우리가 작성한 로그 출력
-4. `>>>>> Step 실행 완료` → 우리가 작성한 로그 출력
-5. `Job: ... status: [COMPLETED]` → Job 정상 완료
+## 3. Core Concepts
 
----
+### 3-1. Spring Batch 4.x 조립 방법 (이 모듈의 고정 문법!)
 
-## 🐛 Lessons Learned
-
-### 버그 1: Job 이름을 지정하지 않으면?
-
-**증상:**
 ```java
 @Bean
 public Job helloJob() {
-    return jobBuilderFactory.get(null)  // 이름을 null로 지정
+    return jobBuilderFactory.get("helloJob")   // Job 이름 = 장부의 JOB_NAME
             .start(helloStep())
             .build();
 }
-```
 
-**에러 메시지:**
-```
-java.lang.IllegalArgumentException: Job name must not be null or empty
-```
-
-**원인:**
-Job 이름은 Spring Batch가 Job을 식별하는 유일한 키입니다. 이름이 없으면 어떤 Job인지 구분할 수 없어요.
-
-**해결:**
-```java
-return jobBuilderFactory.get("helloJob")  // 반드시 이름 지정
-```
-
-**교훈:**
-Job과 Step의 이름은 **필수**입니다. 이름은 JobRepository에 저장되어 실행 이력을 추적하는 데 사용됩니다.
-
----
-
-### 버그 2: @Configuration을 빼먹으면?
-
-**증상:**
-```java
-// @Configuration  <- 이걸 주석 처리하면?
-@RequiredArgsConstructor
-public class HelloJobConfig {
-    ...
-}
-```
-
-**에러 메시지:**
-```
-NoSuchBeanDefinitionException: No qualifying bean of type 'org.springframework.batch.core.Job'
-```
-
-**원인:**
-`@Configuration`이 없으면 Spring이 이 클래스를 설정 클래스로 인식하지 못합니다. 따라서 `@Bean`이 붙은 메서드들도 무시되고, Job Bean이 등록되지 않아요.
-
-**해결:**
-```java
-@Configuration  // 반드시 필요!
-@RequiredArgsConstructor
-public class HelloJobConfig {
-```
-
-**교훈:**
-Spring Batch의 Job Config 클래스는 반드시 `@Configuration`을 붙여야 합니다.
-
----
-
-### 버그 3: 테스트에서 removeJobExecutions()를 빼먹으면?
-
-**증상:**
-```java
-@BeforeEach
-void setUp() {
-    // jobRepositoryTestUtils.removeJobExecutions();  <- 주석 처리
-}
-```
-
-**에러 메시지:**
-```
-JobInstanceAlreadyCompleteException: A job instance already exists and is complete for parameters={}
-```
-
-**원인:**
-Spring Batch는 **동일한 JobParameters로 이미 완료된 Job은 다시 실행하지 않습니다**. 테스트를 두 번째 실행할 때, 첫 번째 실행 기록이 남아있어서 "이미 완료된 Job입니다"라고 에러가 발생해요.
-
-**해결:**
-```java
-@BeforeEach
-void setUp() {
-    jobRepositoryTestUtils.removeJobExecutions();  // 이전 실행 기록 삭제
-}
-```
-
-**교훈:**
-테스트 격리를 위해 각 테스트 전에 `removeJobExecutions()`를 호출해야 합니다.
-
----
-
-### 시니어 개발자의 사고방식
-
-**질문: "왜 Job과 Step을 나눠서 만들어야 하나요? 하나로 합치면 안 되나요?"**
-
-좋은 질문입니다! 실제로 간단한 작업은 Job 안에 Step 하나만 있어도 충분해요.
-
-하지만 실무에서는:
-1. **재사용성**: Step을 독립적으로 만들면 다른 Job에서도 재사용 가능
-2. **디버깅**: 어떤 Step에서 문제가 발생했는지 명확히 알 수 있음
-3. **재시작**: Step 단위로 실패 지점부터 재시작 가능
-4. **병렬 처리**: 독립적인 Step들을 병렬로 실행 가능 (나중에 배울 예정)
-
-**예시:**
-```java
-// ❌ 나쁜 예: 모든 로직을 하나의 Step에
 @Bean
-public Step bigStep() {
-    return stepBuilderFactory.get("bigStep")
+public Step helloStep() {
+    return stepBuilderFactory.get("helloStep")
             .tasklet((contribution, chunkContext) -> {
-                // 데이터 검증
-                // 데이터 처리
-                // 데이터 저장
-                // 알림 발송
-                // 리포트 생성
-                // ...  <- 이러면 디버깅 지옥
-                return RepeatStatus.FINISHED;
+                log.info(">>>>> Hello, Spring Batch!");
+                return RepeatStatus.FINISHED;   // "끝났다" — CONTINUABLE이면 또 호출된다
             })
             .build();
 }
+```
 
-// ✅ 좋은 예: 각 작업을 독립적인 Step으로
-@Bean
-public Job dataProcessJob() {
-    return jobBuilderFactory.get("dataProcessJob")
-            .start(validateStep())      // 1단계: 검증
-            .next(processStep())        // 2단계: 처리
-            .next(saveStep())           // 3단계: 저장
-            .next(notifyStep())         // 4단계: 알림
-            .next(reportStep())         // 5단계: 리포트
-            .build();
+⚠️ 인터넷의 최신 예제는 대부분 **Batch 5.x** (`new JobBuilder("job", jobRepository)`) —
+이 모듈(Boot 2.7 = Batch 4.3)에서는 컴파일조차 안 됩니다. Factory 주입 방식만 사용하세요.
+(TestCraft의 WebSecurityConfigurerAdapter 사건과 같은 종류의 "버전 함정"입니다)
+
+### 3-2. 배치 테스트의 표준 골격 — 전 Step에서 반복된다
+
+```java
+@SpringBatchTest                                              // 테스트 유틸 2종 자동 주입
+@SpringBootTest(classes = {HelloJobConfig.class, TestBatchConfig.class})  // 필요한 것만!
+class HelloJobTest {
+    @Autowired JobLauncherTestUtils jobLauncherTestUtils;     // Job/Step 실행기
+    @Autowired JobRepositoryTestUtils jobRepositoryTestUtils; // 장부 청소기
+
+    @BeforeEach
+    void setUp() { jobRepositoryTestUtils.removeJobExecutions(); }  // 격리 — 필수!
 }
 ```
 
-각 Step이 독립적이면, 예를 들어 "알림 발송"에서 문제가 생겼을 때, 처음부터 다시 실행하지 않고 알림 Step부터 재실행할 수 있어요.
+- `classes`에 필요한 JobConfig만 명시 → 전체 컨텍스트를 띄우지 않아 빠르다 (TestCraft의 슬라이스 철학)
+- `removeJobExecutions()` = 배치판 "롤백". 메타데이터는 트랜잭션 롤백으로 지워지지 않으므로
+  직접 비운다 — 이게 없으면 카운트 검증이 흔들리고 Step 3의 재실행 거부에 걸린다
+- `launchJob()`은 호출마다 **unique 파라미터**를 만들어준다 (왜 필요한지는 Step 3에서!)
 
----
+### 3-3. 실행 한 번 = 장부 한 세트
 
-## 🎯 Key Takeaways
+example의 세 번째 테스트가 Step 1과 이번 Step을 연결합니다:
 
-1. **Job, Step, Tasklet의 계층 구조**
-   - Job은 배치 작업의 최상위 단위
-   - Step은 Job을 구성하는 독립적인 작업 단계
-   - Tasklet은 Step 내에서 수행되는 단순 작업
+```
+launchJob() 1회
+  → BATCH_JOB_INSTANCE   1건 (helloJob + 파라미터)
+  → BATCH_JOB_EXECUTION  1건 (이번 시도, COMPLETED)
+  → BATCH_STEP_EXECUTION 1건 (helloStep, COMPLETED)
+```
 
-2. **JobBuilderFactory와 StepBuilderFactory**
-   - Spring Batch가 자동으로 주입해주는 빌더 팩토리
-   - `.get(이름)` 메서드로 Job/Step 생성 시작
-   - 이름은 필수! (JobRepository에서 식별에 사용)
+### 3-4. BatchStatus vs ExitStatus — 비슷해 보이는 두 상태
 
-3. **RepeatStatus의 의미**
-   - `FINISHED`: Tasklet 종료 (일반적인 경우)
-   - `CONTINUABLE`: Tasklet 계속 반복 (특수한 경우)
+| | BatchStatus | ExitStatus |
+|---|---|---|
+| 누가 보나 | 프레임워크 (실행이 어떻게 끝났나) | 흐름 제어 (다음에 뭘 할까) |
+| 값 | COMPLETED/FAILED/STOPPED... (enum) | 임의 문자열 코드 가능 |
+| 쓰임 | 모니터링, 재시작 판단 | Step 4의 분기(.on("FAILED"))에 사용 |
 
-4. **테스트 시 주의사항**
-   - `@SpringBatchTest` + `@SpringBootTest` 조합
-   - `removeJobExecutions()`로 이전 실행 기록 삭제
-   - `JobLauncherTestUtils`로 쉽게 Job 실행
+지금은 "둘 다 COMPLETED"지만, Step 4에서 ExitStatus를 **조작해 흐름을 바꾸는** 순간
+차이가 선명해집니다.
 
-5. **실무 팁**
-   - 작업을 적절히 Step으로 나누면 재사용성, 디버깅, 재시작이 쉬워짐
-   - 너무 많은 Step으로 나누지 말고, 논리적으로 독립적인 단위로 나누기
+## 4. Step-by-Step
 
----
+```bash
+.\gradlew :spring-batch-onboarding:test --tests "com.batchflow.step02.*"
+```
 
-## 🔗 Next Steps
+1. `HelloJobConfig` — 4.x 조립 문법과 Tasklet 람다
+2. `HelloJobTest` — 실행 → Step 단독 실행 → 장부 확인 순으로
+3. **일부러 깨뜨려보기**: Tasklet의 `RepeatStatus.FINISHED`를 `CONTINUABLE`로 바꾸고 실행 —
+   로그가 어떻게 되나요? (무한 반복! 확인 후 즉시 원복 — Tasklet 반환값의 의미를 몸으로)
 
-Step 2에서는 가장 간단한 형태의 Job을 만들어봤습니다. 하지만 실무에서는 **같은 Job을 여러 번 실행**해야 하는 경우가 많아요.
+## 5. Testing — exercise 풀기
 
-예를 들어:
-- "2025-01-15"의 일일 정산
-- "2025-01-16"의 일일 정산
-- "2025-01-17"의 일일 정산
+`step02/exercise/HelloJobExerciseTest.java`의 TODO 1~5를 채우세요.
+같은 사실(Step 1개 실행)을 **JobExecution 객체**와 **장부(SQL)** 양쪽에서 검증해보는 것이 핵심입니다.
 
-같은 Job이지만, 날짜가 다르면 다른 Job으로 취급되어야 합니다. 어떻게 할까요?
+## 6. Lessons Learned
 
-**Step 3 예고: JobParameters와 JobInstance**
-- JobParameters로 Job에 파라미터 전달
-- JobInstance의 개념 이해
-- @JobScope, @StepScope의 Late Binding
-- 동일한 Job을 다른 파라미터로 여러 번 실행하기
+### 사례 1: removeJobExecutions를 빼먹은 테스트
 
-다음 Step에서 만나요! 🚀
+- **증상**: 단독 실행은 통과, 전체 실행하면 카운트 검증(1건 기대)이 2~3건으로 실패
+- **원인**: 같은 인메모리 DB를 쓰는 다른 테스트 클래스의 실행 기록이 남아있음
+- **해결**: `@BeforeEach`에서 `removeJobExecutions()` — 이 모듈의 철칙
+- **교훈**: 배치 테스트의 격리 장치는 트랜잭션 롤백이 아니라 **장부 청소**다.
+
+### 사례 2: Batch 5.x 예제를 복사했더니 컴파일 에러
+
+- **증상**: `JobBuilder`, `new StepBuilder(..., jobRepository)`가 없는 클래스라고 나옴
+- **원인**: 검색 상위 결과가 Boot 3.x/Batch 5.x 기준
+- **교훈**: Spring 생태계 검색은 **버전 확인이 먼저** — 이 모듈은 4.3.x Factory 방식 고정.
+
+### 시니어의 시선
+
+> "Hello 찍는 Job에 테스트가 왜 필요해요?"라는 질문을 받곤 합니다.
+> 이 Step의 테스트는 Hello를 검증하는 게 아니라 **"Job 실행→장부 기록"이라는
+> 배치의 핵심 계약**을 검증합니다. 이후 모든 Step의 테스트가 이 골격 위에 서고,
+> 운영 장애 분석도 결국 이 장부를 읽는 일입니다.
+
+## 7. Key Takeaways
+
+- 구조: Job(실행 단위) → Step(작업 단계) → Tasklet(코드 한 덩이, FINISHED 반환)
+- 4.x Factory 문법 고정 — 5.x 예제는 컴파일 불가 (버전 함정)
+- 배치 테스트 골격: @SpringBatchTest + classes 명시 + removeJobExecutions
+- 실행 1회 = INSTANCE/EXECUTION/STEP_EXECUTION 한 세트
+- launchStep("이름")으로 Step 단독 실행 — 디버깅 무기
+
+## 8. Next Steps — 다음 Step의 문제
+
+테스트의 `launchJob()`은 매번 **unique 파라미터**를 몰래 만들어 줬습니다. 왜일까요?
+
+운영처럼 "2026-06-11 기준으로 정산해"라고 **같은 파라미터**를 주고 두 번 실행하면...
+**두 번째는 거부당합니다** (`JobInstanceAlreadyCompleteException`).
+버그가 아니라 Spring Batch의 핵심 설계입니다 — 그 이유(중복 정산 방지!)와
+파라미터를 다루는 법(@JobScope, Late Binding)을 **Step 3**에서 정면으로 다룹니다.

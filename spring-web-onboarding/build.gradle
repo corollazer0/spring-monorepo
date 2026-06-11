@@ -1,13 +1,16 @@
 dependencies {
-    // 이 모듈만 사용하는 의존성만 작성
+    // 이 모듈만 사용하는 의존성만 작성 (lombok, spring-boot-starter-test는 루트에서 공통 제공)
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-    runtimeOnly 'com.h2database:h2'
-    runtimeOnly 'mysql:mysql-connector-java'
+    // MyBatis: 3.x는 Boot 3 / Java 17 전용 → Boot 2.5~2.7 호환 최종판 2.3.2 (TestCraft와 동일)
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.3.2'
+
+    runtimeOnly 'com.h2database:h2' // 버전은 Boot 2.7 BOM이 관리, MODE=MSSQLServer로 사용
+
+    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:2.3.2' // @MybatisTest
 }
 
-// bootJar 설정 (Batch나 Web 실행 파일이 필요한 경우만)
+// bootJar 설정
 bootJar { enabled = true }
 jar { enabled = false }

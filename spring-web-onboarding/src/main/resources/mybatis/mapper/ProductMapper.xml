@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.webflow.product.dao.ProductDao">
+
+    <sql id="productColumns">
+        product_id, name, category, price, stock, image_path, created_at
+    </sql>
+
+    <select id="findById" resultType="Product">
+        SELECT <include refid="productColumns"/>
+        FROM product
+        WHERE product_id = #{productId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="productId">
+        INSERT INTO product (name, category, price, stock)
+        VALUES (#{name}, #{category}, #{price}, #{stock})
+    </insert>
+
+    <!--
+        재고 차감의 동시성 안전 패턴: 확인(stock >= 수량)과 차감을 한 UPDATE에.
+        affected = 0 이면 차감 실패 — SELECT 후 UPDATE 두 문장으로 나누면
+        그 사이에 다른 요청이 끼어들어 재고가 음수가 될 수 있다!
+    -->
+    <update id="decreaseStock">
+        UPDATE product
+        SET stock = stock - #{quantity}
+        WHERE product_id = #{productId}
+          AND stock >= #{quantity}
+    </update>
+
+</mapper>

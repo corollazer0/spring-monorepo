@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: web-flow
+
+  # H2 인메모리 + MS-SQL 호환 모드 (실무 DB가 MS-SQL — 전 모듈 공통 정책)
+  # DB명 webdb로 분리: 같은 JVM에서 타 모듈 인메모리 DB와 섞이지 않도록
+  datasource:
+    url: jdbc:h2:mem:webdb;MODE=MSSQLServer;DATABASE_TO_LOWER=FALSE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  sql:
+    init:
+      mode: embedded
+      encoding: UTF-8   # Windows cp949 함정 방지 (TestCraft Step 3의 교훈)
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+# MyBatis 설정
+mybatis:
+  mapper-locations: classpath:mybatis/mapper/*.xml
+  type-aliases-package: com.webflow
+  configuration:
+    map-underscore-to-camel-case: true
+
+# 로깅 설정
+logging:
+  level:
+    com.webflow: DEBUG

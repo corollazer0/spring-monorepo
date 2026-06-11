@@ -1,137 +1,99 @@
-# WebFlow - Spring Web 온보딩 프로젝트
+# WebFlow - 실무 API 종합 온보딩 모듈
 
 > ⚠️ 이 파일은 `spring-web-onboarding` 모듈 전용 규칙입니다.
 > 공통 규칙은 **루트 `CLAUDE.md`** 를 참조하세요.
 
 ---
 
-## 🎯 프로젝트 개요
+## 🎯 모듈 개요
 
-실시간 API 서버 구축을 위한 **Spring Web 온보딩 프로젝트**입니다.
+기본 CRUD를 넘어 **실무 API 서버의 잡기술**(외부 연동/파일/캐싱/스케줄링/운영)을
+약 2주(하루 1~2시간, 자기주도) 안에 갖추게 하는 학습 모듈입니다.
+TestCraft(테스트 기본기) 수료를 전제로 합니다.
 
-> 📌 **TODO**: 상세 내용 추후 추가 예정
+- **커리큘럼**: `docs/web/curriculum/00-WebFlow-Curriculum.md` (필수 Step 1~9 + 심화)
+- 도메인: **미니 커머스** (상품/주문 + 외부 결제·배송 연동)
+- 학습 철학: 문제 주도형 + example/exercise/answer 3종 (TestCraft·BatchFlow와 동일)
 
 ---
 
 ## 🔒 기술 스택 (변경 불가)
 
 ```
-Java:           1.8 (OpenJDK 또는 Oracle JDK)
+Java:           1.8
 Spring Boot:    2.7.17
-Spring Web:     5.3.x (Spring Boot 2.7 내장)
-Spring Data JPA: 2.7.x
-Lombok:         1.18.x
-H2 Database:    2.1.x (로컬 개발)
-MySQL:          8.0.x (운영 환경)
-JUnit:          5.x
-Gradle:         8.x
+MyBatis:        2.3.2 (3.x 금지 — Boot 3 전용)
+H2:             인메모리 + MODE=MSSQLServer (DB명 webdb)
+RestTemplate:   외부 연동 (RestTemplateBuilder 주입 — @RestClientTest 호환)
+spring-retry:   재시도 (Boot BOM 관리, RetryTemplate 프로그래매틱 사용)
+Security:       ❌ 없음! (TestCraft에서 다룸 — 이 모듈은 실무 잡기술에 집중)
+JPA:            ❌ 사용 금지
+```
+
+Security가 없으므로 @WebMvcTest에 `@Import(SecurityConfig)`/`with(csrf())`가 **불필요**하다
+(보안 자동구성은 starter-security가 클래스패스에 있을 때만 활성).
+
+---
+
+## 🏗️ 패키지 구조
+
+```
+src/main/java/com/webflow/
+├── WebFlowApplication.java
+├── config/                  # RestClientConfig(Step 3), CacheConfig(Step 6) 등
+├── common/exception/        # BusinessException 계열 + ErrorResponse + Handler
+├── product/                 # domain/ dao/ service/ controller/ dto/
+├── order/                   # domain/ dao/ service/ controller/ dto/
+├── external/                # 외부 연동 클라이언트
+│   ├── payment/             # Step 3~4: PaymentClient
+│   └── delivery/            # Step 9 캡스톤: DeliveryClient
+├── file/                    # Step 5: 파일 저장/서비스
+└── scheduler/               # Step 7: 정리 스케줄러
+
+src/test/java/com/webflow/
+├── step01/ ~ step09/        # {example, exercise, answer} 3종 (TestCraft 규약)
+└── support/                 # 공통 테스트 지원
 ```
 
 ---
 
-## 📁 디렉토리 구조 (추후 확정)
+## 📜 핵심 규칙
 
-```
-spring-web-onboarding/
-├── CLAUDE.md                          # 이 파일
-├── src/main/java/com/webonboarding/
-│   ├── WebOnboardingApplication.java   # 메인 클래스
-│   │
-│   ├── config/                         # 설정 클래스
-│   │   └── WebConfig.java
-│   │
-│   ├── controller/                     # REST Controller
-│   │   └── MemberController.java
-│   │
-│   ├── service/                        # 비즈니스 로직
-│   │   └── MemberService.java
-│   │
-│   ├── domain/
-│   │   ├── entity/                     # JPA 엔티티
-│   │   ├── repository/                 # Spring Data JPA
-│   │   └── dto/                        # Request/Response DTO
-│   │
-│   └── exception/                      # 예외 처리
-│       ├── GlobalExceptionHandler.java
-│       └── CustomException.java
-│
-└── docs/
-    └── api/                            # API 문서
-```
+### 외부 연동 (Step 3~)
+- RestTemplate은 **RestTemplateBuilder로 생성** (직접 new 금지) — 타임아웃 명시 필수
+- 외부 클라이언트는 `external/` 아래 `{대상}Client` — 외부 DTO와 내부 도메인을 섞지 않는다
+- 재시도는 RetryTemplate(프로그래매틱) — 백오프 없는 재시도 금지
+- 외부 장애가 우리 데이터를 망치지 않게: 실패 시 주문은 PENDING 보존 + 503
 
----
+### DB/SQL
+- `mybatis-mssql` 스킬 준수 (OFFSET/FETCH, IDENTITY, 예약어 회피 — orders!)
+- 재고 차감 등 상태 변경은 **원자적 UPDATE**(WHERE 조건부) — affected 검증
 
-## 🏷️ 네이밍 규칙 (추후 확정)
+### 테스트
+- `spring-test-strategy` 스킬 준수 (계층 매트릭스, 3종 규약, 네이밍/AAA/AssertJ)
+- 외부 연동: `@RestClientTest` + MockRestServiceServer (진짜 HTTP 금지!)
+- 파일: MockMultipartFile + @TempDir / 캐싱: @MockBean DAO + verify(times) /
+  스케줄: 로직 직접 호출(시각 주입)
 
-### 클래스명
+## 📋 계획/태스크 운영 규칙 (MUST)
 
-| 유형 | 패턴 | 예시 |
-|------|------|------|
-| Controller | `{도메인}Controller` | `MemberController` |
-| Service | `{도메인}Service` | `MemberService` |
-| Request DTO | `{기능}Request` | `CreateMemberRequest` |
-| Response DTO | `{도메인}Response` | `MemberResponse` |
+1. 작업 시작 전: `docs/web/plan/plan.md` 계획 추가 + `docs/web/plan/task.md` 등록
+2. 커밋 시: task.md 체크 `[x]` + 해시 병기 (상세: `step-commit` 스킬)
 
-### API 엔드포인트
+## 📊 커밋 규칙
 
-```
-GET    /api/v1/members          # 목록 조회
-GET    /api/v1/members/{id}     # 단건 조회
-POST   /api/v1/members          # 생성
-PUT    /api/v1/members/{id}     # 수정
-DELETE /api/v1/members/{id}     # 삭제
-```
+`✨ feat: [Web/Step N] 제목` + 학습 포인트 섹션. Step 단위 커밋, 매 커밋 전
+`.\gradlew :spring-web-onboarding:test` 그린.
 
----
+## 📚 교육 문서 규칙
 
-## 📜 필수 코딩 규칙 (추후 확정)
-
-### 필수 어노테이션 조합
-
-```java
-// Controller 클래스
-@Slf4j
-@RestController
-@RequestMapping("/api/v1/members")
-@RequiredArgsConstructor
-public class MemberController { }
-
-// Service 클래스
-@Slf4j
-@Service
-@RequiredArgsConstructor
-@Transactional(readOnly = true)
-public class MemberService { }
-```
-
----
-
-## 🧪 테스트 규칙 (추후 확정)
-
-```java
-// Controller 테스트
-@WebMvcTest(MemberController.class)
-class MemberControllerTest { }
-
-// Service 테스트
-@ExtendWith(MockitoExtension.class)
-class MemberServiceTest { }
-
-// 통합 테스트
-@SpringBootTest
-@Transactional
-class MemberIntegrationTest { }
-```
-
----
+- 파일: `docs/web/education/FOR-WebFlow-StepNN.md` (`education-doc` 스킬 템플릿)
+- Step 추가/수정 시 00 커리큘럼 표 갱신
 
 ## 📚 참조 문서
 
 | 문서 | 경로 |
 |------|------|
-| 공통 규칙 | `루트 CLAUDE.md` |
-
----
-
-> 📌 **이 파일은 템플릿입니다.**
-> Spring Web 온보딩 내용이 확정되면 상세 규칙을 추가해주세요.
+| 커리큘럼 (학습 기준) | `docs/web/curriculum/00-WebFlow-Curriculum.md` |
+| 계획/태스크 | `docs/web/plan/plan.md`, `task.md` |
+| 테스트 치트시트 (전 모듈 공통) | `docs/test/skills/spring-test-annotations.md` |

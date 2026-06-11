@@ -21,7 +21,7 @@
 - [x] Step 13: 캡스톤 일일 정산 — `3e7b05c`
 - [x] Step 14(심화): 멀티스레드/병렬 Flow + step10/12 AfterEach 보강 — `93d2058`
 - [x] Step 15(심화): Partitioning — `263bd17`
-- [x] 초보자 README + plan/task 문서 — `(커밋 시 기록)`
+- [x] 초보자 README + plan/task 문서 — `6104efc`
 
 ## Plan 2: 다음 후보 — 📝 미착수
 

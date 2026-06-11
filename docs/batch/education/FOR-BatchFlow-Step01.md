@@ -1,573 +1,144 @@
-# FOR-BatchFlow-Step01: Spring Batch 프로젝트 초기화
+# [Batch Step 1] 배치 인프라 — 판 깔기
 
-> Spring Batch의 핵심 인프라를 구성하고, 배치 메타데이터 테이블을 생성합니다.
-
----
-
-## 🎬 Before We Start
-
-"안녕하세요, 신입 개발자님! 오늘부터 Spring Batch를 배워볼 건데요, 첫날부터 어려운 걸 하진 않을 거예요."
-
-Spring Batch는 마치 **대형 요리 공장**을 운영하는 것과 같아요. 요리 공장을 차리려면 먼저 무엇이 필요할까요?
-
-- 주방 설비 (냉장고, 오븐, 조리대)
-- 재료 창고
-- 작업 일지 (누가, 언제, 무엇을 만들었는지)
-
-Spring Batch도 마찬가지입니다. 배치 작업을 실행하기 전에:
-- **인프라 설정** (Spring Batch 컴포넌트)
-- **데이터베이스** (작업 결과 저장)
-- **메타데이터 테이블** (실행 기록 관리)
-
-이게 준비되어야 본격적인 배치 작업을 할 수 있습니다.
+> **소요 시간**: 약 1시간
+> **이번 Step의 도구**: `@EnableBatchProcessing`, BATCH_* 메타데이터 테이블 6종, H2(MODE=MSSQLServer), `INFORMATION_SCHEMA`로 스키마 검증
+> **코드 위치**: `spring-batch-onboarding/src/test/java/com/batchflow/step01/`
 
 ---
 
-## 🏗️ What We're Building
+## 1. Before We Start — 기록 없는 배치는 신뢰할 수 없다
 
-### Step 1에서 구현할 것
+새벽 3시에 도는 정산 배치를 상상해봅시다. 아침에 출근해서 받는 질문들:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                 Spring Batch Infrastructure                  │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  [1] application.yml                                         │
-│      ├─ Spring Batch 설정 (메타데이터 테이블 자동 생성)      │
-│      ├─ H2 데이터베이스 설정 (메모리 DB)                     │
-│      └─ H2 콘솔 활성화 (웹에서 DB 확인)                      │
-│                                                              │
-│  [2] BatchConfig.java                                        │
-│      └─ @EnableBatchProcessing (핵심 Bean 자동 등록)        │
-│                                                              │
-│  [3] BatchFlowApplication.java                               │
-│      └─ 메인 애플리케이션 진입점                             │
-│                                                              │
-│  [결과] Spring Batch 메타데이터 테이블 6개 생성              │
-│      ├─ BATCH_JOB_INSTANCE                                   │
-│      ├─ BATCH_JOB_EXECUTION                                  │
-│      ├─ BATCH_JOB_EXECUTION_PARAMS                           │
-│      ├─ BATCH_STEP_EXECUTION                                 │
-│      ├─ BATCH_STEP_EXECUTION_CONTEXT                         │
-│      └─ BATCH_JOB_EXECUTION_CONTEXT                          │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-```
+- "어제 배치 돌았어요? **언제, 어떤 파라미터로?**"
+- "실패했다는데 **몇 번째 Step에서, 몇 건 처리하고** 죽었어요?"
+- "다시 돌리면 **이미 처리된 5만 건은** 어떻게 돼요?"
 
----
+이 질문에 답하지 못하는 배치는 운영할 수 없습니다. Spring Batch의 첫 번째 가치는
+화려한 기능이 아니라 **모든 실행을 장부에 남긴다**는 것입니다 — 항공기의 블랙박스처럼,
+실행의 모든 순간이 기록되어야 사고 분석도 재시작도 가능합니다.
 
-## 🧠 Core Concepts
+`@EnableBatchProcessing` 한 줄이 그 장부 시스템 전체를 깔아줍니다.
 
-### 1. @EnableBatchProcessing이 하는 일
+## 2. What We're Building
 
-```java
-@Configuration
-@EnableBatchProcessing  // 이 어노테이션 하나가 마법을 부립니다!
-public class BatchConfig {
-}
-```
-
-**이 어노테이션이 자동으로 등록하는 Bean들:**
-
-| Bean | 역할 | 비유 |
-|------|------|------|
-| **JobRepository** | Job 실행 정보 저장소 | 공장 작업일지 |
-| **JobLauncher** | Job 실행 런처 | 공장 관리자 (작업 시작 버튼) |
-| **JobBuilderFactory** | Job 생성 빌더 | 레시피 템플릿 |
-| **StepBuilderFactory** | Step 생성 빌더 | 작업 단계 템플릿 |
-
-**비유로 이해하기:**
-- JobRepository = 공장의 **작업 일지**. "오늘 누가 무슨 요리를 만들었고, 성공했는지 실패했는지" 기록
-- JobLauncher = **공장 관리자**. "자, 이제 김치찌개 만들기 시작!" 하고 작업 시작 버튼을 누르는 사람
-- JobBuilderFactory = **레시피 템플릿**. 요리를 만들 때 사용하는 빈 레시피 양식
-- StepBuilderFactory = **작업 단계 템플릿**. "1. 재료 손질, 2. 볶기, 3. 끓이기" 같은 단계별 작업 양식
-
-### 2. Spring Batch 메타데이터 테이블
-
-Spring Batch는 **실행 이력을 반드시 기록**합니다. 왜냐하면:
-- 같은 작업을 두 번 실행하면 안 되는 경우가 많음 (예: 일일 정산)
-- 실패한 작업을 이어서 실행할 수 있어야 함
-- 누가, 언제, 무엇을, 얼마나 처리했는지 추적 필요
-
-**6개의 메타데이터 테이블:**
+이번 Step은 코드를 "만들기"보다 **깔린 판을 확인하고 검증**합니다.
 
 ```
-┌────────────────────────────────────────────────────────────┐
-│                    메타데이터 테이블 구조                     │
-├────────────────────────────────────────────────────────────┤
-│                                                             │
-│  [BATCH_JOB_INSTANCE]                                       │
-│    Job 고유 식별 정보 (Job 이름 + Parameters)               │
-│    ├─ JOB_INSTANCE_ID                                       │
-│    ├─ JOB_NAME (예: "dormantMemberJob")                     │
-│    └─ JOB_KEY (Parameters 해시값)                           │
-│                                                             │
-│  [BATCH_JOB_EXECUTION]                                      │
-│    Job 실행 시도 기록 (성공/실패/진행중)                     │
-│    ├─ JOB_EXECUTION_ID                                      │
-│    ├─ STATUS (COMPLETED, FAILED, STARTED 등)                │
-│    ├─ START_TIME, END_TIME                                  │
-│    └─ EXIT_CODE, EXIT_MESSAGE                               │
-│                                                             │
-│  [BATCH_JOB_EXECUTION_PARAMS]                               │
-│    Job 실행 시 전달된 파라미터                               │
-│    ├─ PARAMETER_NAME (예: "requestDate")                    │
-│    ├─ PARAMETER_VALUE (예: "2025-01-26")                    │
-│    └─ PARAMETER_TYPE (STRING, LONG, DATE 등)                │
-│                                                             │
-│  [BATCH_STEP_EXECUTION]                                     │
-│    Step 실행 기록 (읽기/쓰기 건수 포함)                      │
-│    ├─ STEP_EXECUTION_ID                                     │
-│    ├─ READ_COUNT, WRITE_COUNT (처리 건수)                   │
-│    ├─ COMMIT_COUNT, ROLLBACK_COUNT                          │
-│    └─ STATUS, EXIT_CODE                                     │
-│                                                             │
-│  [BATCH_STEP_EXECUTION_CONTEXT]                             │
-│    Step 간 데이터 공유 (JSON 형태)                          │
-│    └─ SERIALIZED_CONTEXT                                    │
-│                                                             │
-│  [BATCH_JOB_EXECUTION_CONTEXT]                              │
-│    Job 전체에서 공유하는 데이터                              │
-│    └─ SERIALIZED_CONTEXT                                    │
-│                                                             │
-└────────────────────────────────────────────────────────────┘
-```
-
-### 3. initialize-schema: always의 의미
-
-```yaml
-spring:
-  batch:
-    jdbc:
-      initialize-schema: always  # 이 설정의 의미는?
-```
-
-| 값 | 의미 | 사용 시기 |
-|---|------|----------|
-| **always** | 앱 시작 시 항상 테이블 생성 | 개발 환경, H2 메모리 DB |
-| **never** | 테이블 생성 안 함 (수동 관리) | 운영 환경 |
-| **embedded** | 내장 DB(H2, HSQL)일 때만 생성 | 기본값 |
-
-**왜 always로 설정했나요?**
-- H2는 **메모리 DB**라서 애플리케이션 종료 시 데이터가 사라집니다.
-- 매번 다시 시작할 때마다 테이블을 새로 만들어야 해요.
-- 운영 환경(MySQL, PostgreSQL)에서는 **never**로 설정하고 DBA가 직접 관리합니다.
-
-### 4. job.enabled: false의 비밀
-
-```yaml
-spring:
-  batch:
-    job:
-      enabled: false  # 자동 실행 비활성화
-```
-
-**기본값(true)이면 무슨 일이?**
-- 애플리케이션 시작 시 **모든 Job이 자동 실행**됩니다.
-- 여러 개의 Job이 있으면 전부 실행돼서 혼란 발생!
-
-**false로 설정하면?**
-- 수동으로 원하는 Job만 실행 가능
-- 테스트 작성이 쉬워짐
-- 실수로 운영 Job이 실행되는 것 방지
-
-**실무 팁:**
-- 개발 환경: `false` (테스트용)
-- 운영 환경: `false` + 스케줄러(Cron) 또는 REST API로 실행
-
----
-
-## 💻 Step-by-Step Implementation
-
-### Step 1: application.yml 작성
-
-**위치:** `spring-batch-onboarding/src/main/resources/application.yml`
-
-```yaml
-spring:
-  application:
-    name: batch-flow
-
-  # Spring Batch 설정
-  batch:
-    jdbc:
-      initialize-schema: always  # BATCH_* 메타데이터 테이블 자동 생성
-    job:
-      enabled: false  # 자동 실행 비활성화
-
-  # H2 데이터베이스 설정
-  datasource:
-    url: jdbc:h2:mem:batchdb;MODE=MySQL;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
-  # JPA 설정
-  jpa:
-    hibernate:
-      ddl-auto: create  # 애플리케이션 시작 시 테이블 자동 생성
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-
-  # H2 콘솔 설정
-  h2:
-    console:
-      enabled: true  # H2 웹 콘솔 활성화
-      path: /h2-console
-
-# 로깅 설정
-logging:
-  level:
-    com.batchflow: DEBUG
-    org.springframework.batch: INFO
-```
-
-**주요 설정 설명:**
-- `jdbc:h2:mem:batchdb`: 메모리 기반 H2 데이터베이스
-- `MODE=MySQL`: MySQL 호환 모드 (실무와 유사한 환경)
-- `DB_CLOSE_DELAY=-1`: JVM 종료 전까지 DB 유지
-- `show-sql: true`: 실행되는 SQL 로그 출력 (학습용)
-
-### Step 2: BatchConfig.java 작성
-
-**위치:** `spring-batch-onboarding/src/main/java/com/batchflow/config/BatchConfig.java`
-
-```java
-package com.batchflow.config;
-
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.context.annotation.Configuration;
-
-/**
- * Spring Batch 기본 설정
- *
- * @EnableBatchProcessing
- * - Spring Batch의 핵심 인프라 Bean들을 자동으로 등록합니다.
- * - JobRepository: Job 실행 정보를 저장하는 저장소
- * - JobLauncher: Job을 실행하는 런처
- * - JobBuilderFactory: Job을 생성하는 빌더 팩토리
- * - StepBuilderFactory: Step을 생성하는 빌더 팩토리
- */
-@Configuration
 @EnableBatchProcessing
-public class BatchConfig {
-    // 기본 설정은 @EnableBatchProcessing이 자동으로 처리
-    // 필요에 따라 커스텀 설정 추가 가능 (TaskExecutor, DataSource 등)
-}
+        │
+        ├── 핵심 Bean 4종 ──────────── JobRepository  (장부 저장소)
+        │                              JobLauncher    (실행 진입점)
+        │                              JobBuilderFactory / StepBuilderFactory (조립 공장, 4.x)
+        │
+        └── 메타데이터 테이블 6종 ───── BATCH_JOB_INSTANCE / JOB_EXECUTION / JOB_EXECUTION_PARAMS
+            (initialize-schema)        BATCH_STEP_EXECUTION / JOB·STEP_EXECUTION_CONTEXT
 ```
 
-**왜 이렇게 간단한가요?**
-- `@EnableBatchProcessing`이 거의 모든 걸 자동으로 해줍니다.
-- 나중에 성능 튜닝이 필요하면 여기에 TaskExecutor, DataSource 등을 추가합니다.
+```
+src/test/java/com/batchflow/step01/
+├── example/BatchInfrastructureTest.java   ← 빈 4종 + 테이블 6종 + 통계 컬럼 검증
+├── exercise/MetadataSchemaExerciseTest.java
+└── answer/MetadataSchemaAnswerTest.java
+```
 
-### Step 3: BatchFlowApplication.java 패키지 정리
+### 이번에 바뀐 인프라 (중요!)
 
-**위치:** `spring-batch-onboarding/src/main/java/com/batchflow/BatchFlowApplication.java`
+| 항목 | 이전 | 현재 | 이유 |
+|------|------|------|------|
+| DB | H2 **파일**(~/batchdb) + MODE=**MySQL** | H2 **인메모리** + MODE=**MSSQLServer** | 실무 DB(MS-SQL) 방언 정합 + 테스트 격리(매 실행 깨끗한 상태) |
+| ORM | JPA(ddl-auto) | **JDBC만** (JPA 제거) | 배치 필수 트랙은 Jdbc Reader/Writer 중심 — 학습 표면 축소 |
+
+## 3. Core Concepts
+
+### 3-1. 메타데이터 테이블 6종 — 장부의 구조
+
+| 테이블 | 기록하는 것 | 비유 |
+|--------|------------|------|
+| BATCH_JOB_INSTANCE | "어떤 Job + 어떤 파라미터"라는 논리적 단위 | 항공편 (KE123, 6/11편) |
+| BATCH_JOB_EXECUTION | 그 인스턴스의 실행 시도 (1:N) | 그 항공편의 운항 시도 (결항 후 재운항 포함) |
+| BATCH_JOB_EXECUTION_PARAMS | 실행 파라미터 | 운항 조건 |
+| BATCH_STEP_EXECUTION | Step별 실행 통계 (READ/WRITE/SKIP/COMMIT...) | 구간별 비행 기록 |
+| BATCH_JOB/STEP_EXECUTION_CONTEXT | 실행 중 상태 보관함 | 블랙박스 스냅샷 |
+
+**READ_COUNT, WRITE_COUNT, FILTER_COUNT, SKIP 계열, ROLLBACK_COUNT** —
+이 컬럼들은 이후 모든 Step에서 "몇 건 읽고 걸러내고 썼는지"를 검증하는 무기가 됩니다
+(example의 두 번째 테스트가 이 컬럼들의 존재를 봉인해 둡니다).
+
+### 3-2. JobInstance vs JobExecution — 미리 심는 복선
+
+`BATCH_JOB_INSTANCE`에는 `JOB_KEY`라는 컬럼이 있습니다(exercise에서 직접 확인).
+**파라미터의 해시값**인데, 이것이 Step 3에서 "같은 파라미터로는 성공한 Job을
+다시 못 돌린다"는 사건의 범인입니다. 지금은 컬럼의 존재만 기억해두세요.
+
+### 3-3. 스키마도 테스트로 검증한다
 
 ```java
-package com.batchflow;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-/**
- * BatchFlow 온보딩 프로젝트 메인 애플리케이션
- *
- * Spring Batch를 학습하기 위한 온보딩 프로젝트입니다.
- * 50개의 Step을 통해 Batch 처리의 기초부터 실전까지 학습합니다.
- */
-@SpringBootApplication
-public class BatchFlowApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(BatchFlowApplication.class, args);
-    }
-}
+List<String> tables = jdbcTemplate.queryForList(
+        "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME LIKE 'BATCH_%'", ...);
+assertThat(tables).contains("BATCH_JOB_INSTANCE", ...);
 ```
 
-**패키지 구조:**
-```
-com.batchflow/
-├── BatchFlowApplication.java    (메인)
-└── config/
-    └── BatchConfig.java          (설정)
-```
+"메타테이블이 자동 생성된다"는 설정(`initialize-schema: embedded`)의 약속을
+**테스트가 봉인**합니다. 누군가 설정을 지우면 이 테스트가 먼저 깨집니다 —
+TestCraft에서 배운 "설정 한 줄의 회귀를 테스트로 막는다"의 배치 버전입니다.
 
----
+### 3-4. 왜 `spring.batch.job.enabled: false`인가
 
-## 🧪 Testing
+기본값(true)이면 **애플리케이션이 뜰 때 등록된 모든 Job이 자동 실행**됩니다.
+테스트 컨텍스트가 뜰 때마다 Job이 제멋대로 돌아가는 대참사 — 그래서 이 모듈은
+끄고, 실행은 항상 테스트(JobLauncherTestUtils)나 명시적 호출로만 합니다.
 
-### 테스트 방법 1: 애플리케이션 실행
+## 4. Step-by-Step
 
-**실행 명령:**
 ```bash
-# 프로젝트 루트에서
-cd spring-batch-onboarding
-../gradlew bootRun
-
-# 또는 IDE에서 BatchFlowApplication.java 실행
+.\gradlew :spring-batch-onboarding:test --tests "com.batchflow.step01.*"
 ```
 
-**성공 로그 예시:**
-```
-  .   ____          _            __ _ _
- /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
-( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
- \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
-  '  |____| .__|_| |_|_| |_\__, | / / / /
- =========|_|==============|___/=/_/_/_/
- :: Spring Boot ::       (v2.7.17)
+1. `application.yml`을 열어 datasource(MSSQLServer 모드)와 batch 설정 2종을 확인
+2. `BatchInfrastructureTest` — 빈 4종 → 테이블 6종 → 통계 컬럼 순으로 읽기
+3. **일부러 깨뜨려보기**: yml에서 `initialize-schema: embedded`를 `never`로 바꾸고 실행 —
+   어떤 테스트가 어떻게 깨지나요? (확인 후 원복)
 
-2025-01-26 23:45:12.123  INFO 12345 --- [main] c.b.BatchFlowApplication : Starting BatchFlowApplication
-2025-01-26 23:45:13.456  INFO 12345 --- [main] o.s.b.c.config.JobRegistryBeanPostProcessor : No job beans found
-2025-01-26 23:45:14.789  INFO 12345 --- [main] c.b.BatchFlowApplication : Started BatchFlowApplication in 3.5 seconds
-```
+## 5. Testing — exercise 풀기
 
-**주목할 로그:**
-- `No job beans found`: 아직 Job을 만들지 않아서 정상입니다!
-- `Started BatchFlowApplication`: 정상 기동 완료
+`step01/exercise/MetadataSchemaExerciseTest.java`의 TODO 1~3을 채우세요.
+JOB_KEY 컬럼을 직접 확인하는 것이 포인트 — Step 3의 복선입니다.
 
-### 테스트 방법 2: H2 콘솔에서 테이블 확인
+## 6. Lessons Learned
 
-**1. 웹 브라우저에서 H2 콘솔 접속:**
-```
-http://localhost:8080/h2-console
-```
+### 사례 1: 파일 DB(~/batchdb)의 함정 (이번 전환의 이유)
 
-**2. 접속 정보 입력:**
-- JDBC URL: `jdbc:h2:mem:batchdb`
-- User Name: `sa`
-- Password: (비워둠)
+- **증상**: 테스트가 "내 PC에서만" 실패한다 — 동료 PC에서는 통과
+- **원인**: H2 파일 DB는 이전 실행의 메타데이터가 홈 디렉토리에 **누적**된다.
+  지난주에 돌린 Job 기록이 오늘 테스트의 JobInstance 충돌을 일으킨다
+- **해결**: 인메모리(`mem:batchdb`) 전환 — 매 실행이 깨끗한 상태에서 시작
+- **교훈**: 테스트의 반복 가능성(F.I.R.S.T의 R)은 저장소 선택에서 시작된다.
 
-**3. Connect 버튼 클릭**
+### 사례 2: MODE=MySQL인데 실무는 MS-SQL
 
-**4. 메타데이터 테이블 확인 SQL:**
-```sql
--- 1. 테이블 목록 조회
-SELECT TABLE_NAME
-FROM INFORMATION_SCHEMA.TABLES
-WHERE TABLE_SCHEMA = 'PUBLIC'
-  AND TABLE_NAME LIKE 'BATCH%'
-ORDER BY TABLE_NAME;
+- **증상**: H2(MySQL 모드)에서 통과한 SQL이 실서버(MS-SQL)에서 문법 오류 (LIMIT 등)
+- **해결**: MODE=MSSQLServer로 통일 + MS-SQL 방언 규칙(`mybatis-mssql` 스킬) 적용
+- **교훈**: 호환 모드는 "실무와 같은 방언"일 때만 학습 전이가 생긴다.
 
--- 예상 결과: 6개 테이블
--- BATCH_JOB_EXECUTION
--- BATCH_JOB_EXECUTION_CONTEXT
--- BATCH_JOB_EXECUTION_PARAMS
--- BATCH_JOB_INSTANCE
--- BATCH_STEP_EXECUTION
--- BATCH_STEP_EXECUTION_CONTEXT
-```
+### 시니어의 시선
 
-**5. 각 테이블 구조 확인:**
-```sql
--- BATCH_JOB_INSTANCE 구조
-SELECT * FROM BATCH_JOB_INSTANCE LIMIT 0;
+> 배치 면접에서 제가 꼭 묻는 질문: "BATCH_JOB_INSTANCE와 BATCH_JOB_EXECUTION의
+> 차이가 뭔가요?" — 이 차이를 아는 사람은 재시작과 중복 방지를 설계할 수 있고,
+> 모르는 사람은 메타테이블을 "지워도 되는 로그"로 취급하다 사고를 냅니다.
+> 운영 중인 메타테이블을 함부로 TRUNCATE하지 마세요. 그건 장부 소각입니다.
 
--- BATCH_JOB_EXECUTION 구조
-SELECT * FROM BATCH_JOB_EXECUTION LIMIT 0;
+## 7. Key Takeaways
 
--- BATCH_STEP_EXECUTION 구조
-SELECT * FROM BATCH_STEP_EXECUTION LIMIT 0;
-```
+- @EnableBatchProcessing = 핵심 Bean 4종 + 메타데이터 장부 6종
+- 배치의 신뢰성(재시작/중복방지/추적)은 전부 메타데이터 위에서 동작한다
+- `job.enabled: false` — Job 실행은 항상 명시적으로
+- 스키마/설정의 약속도 테스트로 봉인한다 (INFORMATION_SCHEMA)
+- JOB_KEY(파라미터 해시)를 기억하라 — Step 3의 복선
 
-**현재는 데이터가 없어야 정상입니다!**
-- 아직 Job을 실행하지 않았으니까요.
-- Step 2에서 첫 Job을 만들면 데이터가 생깁니다.
+## 8. Next Steps — 다음 Step의 문제
 
-### 테스트 방법 3: Bean 등록 확인 (선택)
-
-**Bean 확인용 테스트 코드:**
-
-**위치:** `spring-batch-onboarding/src/test/java/com/batchflow/config/BatchConfigTest.java`
-
-```java
-package com.batchflow.config;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-@SpringBootTest
-class BatchConfigTest {
-
-    @Autowired(required = false)
-    private JobRepository jobRepository;
-
-    @Autowired(required = false)
-    private JobLauncher jobLauncher;
-
-    @Autowired(required = false)
-    private JobBuilderFactory jobBuilderFactory;
-
-    @Autowired(required = false)
-    private StepBuilderFactory stepBuilderFactory;
-
-    @Test
-    void BatchConfig_EnableBatchProcessing_핵심Bean등록확인() {
-        // then - @EnableBatchProcessing이 자동으로 등록한 Bean들 확인
-        assertThat(jobRepository).isNotNull();
-        assertThat(jobLauncher).isNotNull();
-        assertThat(jobBuilderFactory).isNotNull();
-        assertThat(stepBuilderFactory).isNotNull();
-    }
-}
-```
-
-**테스트 실행:**
-```bash
-../gradlew test --tests BatchConfigTest
-```
-
-**성공 시 출력:**
-```
-BatchConfigTest > BatchConfig_EnableBatchProcessing_핵심Bean등록확인() PASSED
-```
-
----
-
-## 🐛 Lessons Learned
-
-### 버그 1: H2 콘솔 접속 안 됨
-
-**증상:**
-```
-H2 콘솔에서 Connect 시 "Database not found" 에러
-```
-
-**원인:**
-- JDBC URL을 잘못 입력 (`jdbc:h2:mem:testdb` 대신 `jdbc:h2:mem:batchdb`)
-- 또는 애플리케이션이 실행 중이지 않음
-
-**해결:**
-1. JDBC URL을 정확히 확인: `jdbc:h2:mem:batchdb`
-2. 애플리케이션이 실행 중인지 확인
-3. `DB_CLOSE_DELAY=-1` 설정 확인 (없으면 연결이 즉시 끊김)
-
-**교훈:**
-- H2 메모리 DB는 **애플리케이션과 생명주기를 같이합니다**.
-- 앱이 꺼지면 DB도 사라집니다.
-
-### 버그 2: 메타데이터 테이블이 안 생김
-
-**증상:**
-```sql
-SELECT * FROM BATCH_JOB_INSTANCE;
--- Table "BATCH_JOB_INSTANCE" not found
-```
-
-**원인:**
-- `spring.batch.jdbc.initialize-schema`가 `never`로 설정됨
-- 또는 DataSource 설정이 잘못됨
-
-**해결:**
-```yaml
-spring:
-  batch:
-    jdbc:
-      initialize-schema: always  # 이 설정 확인!
-```
-
-**교훈:**
-- 개발 환경에서는 `always`로 설정해서 자동 생성
-- 운영 환경에서는 `never`로 설정하고 DBA가 수동으로 테이블 생성
-
-### 버그 3: 애플리케이션 시작 시 Job이 자동 실행됨
-
-**증상:**
-```
-애플리케이션 시작하자마자 모든 Job이 실행되어 혼란
-```
-
-**원인:**
-- `spring.batch.job.enabled: true` (기본값)
-
-**해결:**
-```yaml
-spring:
-  batch:
-    job:
-      enabled: false  # 자동 실행 비활성화
-```
-
-**교훈:**
-- 개발/테스트 환경에서는 **반드시 false**로 설정
-- 운영 환경도 false로 설정하고, 스케줄러나 API로 실행
-
-### 시니어 개발자의 사고방식
-
-**"왜 H2 메모리 DB를 사용하나요? MySQL을 쓰면 안 되나요?"**
-
-좋은 질문입니다! 각각의 장단점이 있어요:
-
-| 환경 | DB | 장점 | 단점 |
-|------|-----|------|------|
-| **학습/개발** | H2 메모리 | 설치 불필요, 빠름, 초기화 쉬움 | 재시작 시 데이터 소실 |
-| **통합 테스트** | H2 파일 | 데이터 유지, 빠름 | 방언(Dialect) 차이 |
-| **운영** | MySQL/PostgreSQL | 안정성, 확장성, 실제 환경 | 설치/관리 필요 |
-
-**실무 팁:**
-- Step 1-20: H2 메모리 (빠른 학습)
-- Step 21-50: MySQL 추가 (실전 준비)
-- 운영: 절대 H2 사용 금지!
-
----
-
-## 🎯 Key Takeaways
-
-### 1. @EnableBatchProcessing은 Spring Batch의 "마법 주문"
-- 이 어노테이션 하나로 핵심 인프라 Bean이 모두 등록됩니다.
-- JobRepository, JobLauncher, JobBuilderFactory, StepBuilderFactory
-
-### 2. Spring Batch는 실행 이력을 반드시 기록합니다
-- 6개의 메타데이터 테이블에 모든 실행 정보 저장
-- 같은 Job+Parameters 조합은 한 번만 성공 가능 (재실행 방지)
-
-### 3. initialize-schema: always는 개발 환경 전용
-- H2 메모리 DB에서는 always 사용
-- 운영 환경(MySQL, PostgreSQL)에서는 never + 수동 관리
-
-### 4. job.enabled: false로 설정하는 습관
-- 자동 실행 방지로 예상치 못한 Job 실행 차단
-- 테스트 작성과 디버깅이 훨씬 쉬워짐
-
-### 5. H2 콘솔은 강력한 학습 도구
-- 웹에서 바로 SQL 실행 가능
-- 메타데이터 테이블을 직접 조회하며 Spring Batch 내부 동작 이해
-
----
-
-## ✅ 기능 확인 체크리스트
-
-완료했으면 체크하세요!
-
-- [ ] 애플리케이션이 정상 실행됨 (`Started BatchFlowApplication` 로그 확인)
-- [ ] H2 콘솔 접속 성공 (`http://localhost:8080/h2-console`)
-- [ ] 6개의 BATCH_* 테이블 생성 확인
-- [ ] BatchConfigTest 통과 (핵심 Bean 등록 확인)
-- [ ] 로그에 "No job beans found" 메시지 (정상, 아직 Job 없음)
-
----
-
-## 🔗 Next Steps
-
-**Step 2 예고: Hello World Job 만들기**
-
-이제 기본 인프라가 준비되었으니, 드디어 첫 번째 Job을 만들어볼 거예요!
-
-Step 2에서는:
-- Job과 Step의 개념 이해
-- Tasklet을 사용한 간단한 작업 실행
-- JobLauncher로 수동 실행
-- 메타데이터 테이블에 실행 기록이 남는 것 확인
-
-"Hello, Spring Batch!"를 출력하는 간단한 Job이지만, Spring Batch의 핵심 개념을 모두 담고 있습니다.
-
-다음 Step에서 만나요! 🚀
+판은 깔렸습니다. 그런데 정작 **Job이 하나도 없습니다.**
+가장 작은 배치 — Job 하나, Step 하나, "Hello"를 찍는 Tasklet 하나 — 를 만들고
+테스트로 실행해봅니다. 그리고 그 한 번의 실행이 방금 본 장부에
+**어떤 기록을 남기는지** 직접 확인합니다. → **Step 2**

@@ -1,364 +1,177 @@
-# BatchFlow - Spring Batch 온보딩 프로젝트
+# BatchFlow - Spring Batch 온보딩 모듈
 
 > ⚠️ 이 파일은 `spring-batch-onboarding` 모듈 전용 규칙입니다.
 > 공통 규칙은 **루트 `CLAUDE.md`** 를 참조하세요.
 
 ---
 
-## 🎯 프로젝트 개요
+## 🎯 모듈 개요
 
-금융권 대용량 배치 처리 시스템 구축을 위한 **Spring Batch 온보딩 프로젝트**입니다.
-50개의 Step을 거쳐 점진적으로 Spring Batch를 마스터합니다.
+Spring Batch 미경험자가 **약 2주(하루 1~2시간, 자기주도)** 안에 실무 배치의 기본기
+(Job 설계 → Chunk → 오류 제어 → 재시작)를 갖추게 하는 학습 모듈입니다.
 
-**학습 철학**: `문제 발생 → 원인 분석 → 해결 → 패턴화`
+- **학습 기준 커리큘럼**: `docs/batch/curriculum/01-BatchFlow-Essential-Curriculum.md` (필수 Step 1~13 + 심화 14~15)
+- 기존 50-Step 문서(`00-BatchFlow-Curriculum.md`)는 **심화/전체 참조 자료** (필수 트랙과의 매핑표는 01 문서)
+- 학습 철학: 문제 주도형 — 각 Step은 앞 단계의 한계에서 출발 (TestCraft와 동일)
 
 ---
 
 ## 🔒 기술 스택 (변경 불가)
 
 ```
-Java:           1.8 (OpenJDK 또는 Oracle JDK)
+Java:           1.8
 Spring Boot:    2.7.17
-Spring Batch:   4.3.x (Spring Boot 2.7 내장)
-Lombok:         1.18.x
-H2 Database:    2.1.x (로컬 개발)
-MySQL:          8.0.x (운영 환경)
-JUnit:          5.x (@SpringBatchTest)
-Gradle:         8.x
+Spring Batch:   4.3.x (Boot 2.7 내장 — 5.x 스타일 금지!)
+H2:             Boot BOM 관리, 인메모리 + MODE=MSSQLServer (실무 DB가 MS-SQL)
+JUnit:          5.x + spring-batch-test (@SpringBatchTest)
+Lombok:         루트 build.gradle이 제공
+JPA:            ❌ 사용 금지 (JDBC 기반 — JdbcCursor/PagingItemReader, JdbcBatchItemWriter)
 ```
+
+DB 정책: `jdbc:h2:mem:batchdb;MODE=MSSQLServer;...` — SQL은 MS-SQL 방언
+(`mybatis-mssql` 스킬의 방언 규칙 준수: OFFSET/FETCH, IDENTITY, GETDATE, NVARCHAR).
 
 ---
 
-## 📁 디렉토리 구조 (필수 준수)
+## 🏗️ 디렉토리 구조
 
 ```
-spring-batch-onboarding/
-├── CLAUDE.md                          # 이 파일
-├── src/main/java/com/batchflow/
-│   ├── BatchflowApplication.java       # 메인 클래스
-│   │
-│   ├── config/                         # 설정 클래스
-│   │   ├── BatchConfig.java            # @EnableBatchProcessing
-│   │   └── DataSourceConfig.java       # 데이터소스 설정
-│   │
-│   ├── job/                            # Job 정의
-│   │   ├── hello/                      # Step 1-8: 기초
-│   │   │   └── HelloJobConfig.java
-│   │   ├── dormant/                    # Step 15-18: 휴면회원
-│   │   │   └── DormantMemberJobConfig.java
-│   │   ├── settlement/                 # Step 43-46: 정산
-│   │   │   └── DailySettlementJobConfig.java
-│   │   └── notification/               # Step 47-50: 알림
-│   │       └── MassNotificationJobConfig.java
-│   │
-│   ├── domain/
-│   │   ├── entity/                     # JPA 엔티티
-│   │   ├── repository/                 # Spring Data JPA
-│   │   └── dto/                        # DTO 클래스
-│   │
-│   ├── reader/                         # 커스텀 ItemReader
-│   ├── processor/                      # 커스텀 ItemProcessor
-│   ├── writer/                         # 커스텀 ItemWriter
-│   ├── listener/                       # 리스너
-│   │   ├── job/
-│   │   ├── step/
-│   │   └── chunk/
-│   ├── partitioner/                    # Partitioner
-│   ├── tasklet/                        # Tasklet
-│   └── util/                           # 유틸리티
-│
-└── docs/
-    ├── 00-BatchFlow-Curriculum.md
-    ├── 01-AI-Prompt-Guide.md
-    ├── 04-Database-Schema-And-Data.md
-    ├── skills/                         # 스킬 문서
-    └── guides/                         # 교육 가이드
+src/main/java/com/batchflow/
+├── BatchFlowApplication.java
+├── config/BatchConfig.java          # @EnableBatchProcessing
+├── job/                             # Job 정의 (도메인별 하위 패키지)
+│   ├── hello/                       # Step 2
+│   ├── dormant/                     # Step 7~12 (휴면회원 전환)
+│   └── settlement/                  # Step 13 캡스톤 (일일 정산)
+├── domain/                          # 순수 자바 도메인 (JPA 엔티티 아님!)
+├── listener/                        # Job/Step/Skip 리스너
+└── (reader/processor/writer는 JobConfig 내 @Bean 우선, 복잡해지면 분리)
+
+src/main/resources/
+├── application.yml                  # H2 MSSQLServer, batch.job.enabled=false
+├── schema.sql / data.sql            # 도메인 테이블 + 소규모 시드 (Step 6~)
+
+src/test/java/com/batchflow/
+├── config/TestBatchConfig.java      # @EnableBatchProcessing + @EnableAutoConfiguration
+├── step01/ ~ step13/                # 필수 트랙
+│   ├── example/   # 완성 모범 — 항상 통과
+│   ├── exercise/  # @Disabled TODO 골격 — 컴파일 항상 성공
+│   └── answer/    # 모범답안 — 항상 통과
+└── advanced/step14/ ~ step15/       # 심화
 ```
+
+example/exercise/answer 3종 규약은 TestCraft와 동일
+(클래스명 `{대상}Test` / `{대상}ExerciseTest` / `{대상}AnswerTest`, exercise는 클래스 레벨 @Disabled).
 
 ---
 
-## 🏷️ 네이밍 규칙
+## 📜 Spring Batch 4.x 필수 스타일
 
-### 클래스명
+```java
+@Slf4j
+@Configuration
+@RequiredArgsConstructor
+public class XxxJobConfig {
+
+    private final JobBuilderFactory jobBuilderFactory;   // ✅ 4.x Factory 주입
+    private final StepBuilderFactory stepBuilderFactory;
+
+    private static final String JOB_NAME = "xxxJob";     // ✅ 이름은 상수
+    private static final int CHUNK_SIZE = 10;            // ✅ chunk size는 상수 (하드코딩 금지)
+}
+```
+
+### ⛔ 금지 (NEVER)
+
+```java
+// ❌ Spring Batch 5.x 스타일 — 인터넷 최신 예제 주의!
+@Bean
+public Job myJob(JobRepository jobRepository, ...) { }
+new StepBuilder("step", jobRepository)...
+
+// ❌ JPA 엔티티/리포지토리 (이 모듈은 JDBC 기반)
+// ❌ 하드코딩 chunk size: .chunk(500)
+// ❌ 테스트에서 Job 직접 @Autowired (JobLauncherTestUtils 사용)
+```
+
+### Bean/클래스 네이밍
 
 | 유형 | 패턴 | 예시 |
 |------|------|------|
 | Job Config | `{도메인}{기능}JobConfig` | `DormantMemberJobConfig` |
-| Reader | `{도메인}ItemReader` | `MemberItemReader` |
-| Processor | `{도메인}ItemProcessor` | `DormantMemberProcessor` |
-| Writer | `{도메인}ItemWriter` | `MemberStatusWriter` |
-| Listener | `{레벨}{목적}Listener` | `JobExecutionLoggingListener` |
-| Partitioner | `{기준}Partitioner` | `MemberIdRangePartitioner` |
-| Tasklet | `{기능}Tasklet` | `CleanupTasklet` |
-
-### Bean 이름
-
-```java
-// Job - camelCase + Job
-@Bean
-public Job dormantMemberJob() { }
-
-// Step - camelCase + Step  
-@Bean
-public Step dormantMemberStep() { }
-
-// Reader - camelCase + Reader 또는 ItemReader
-@Bean
-public JpaPagingItemReader<Member> dormantMemberReader() { }
-```
+| Job/Step Bean | camelCase + Job/Step | `dormantMemberJob()`, `dormantMemberStep()` |
+| Reader/Processor/Writer Bean | `{도메인}{역할}` | `dormantMemberReader()` |
+| Listener | `{레벨}{목적}Listener` | `JobDurationListener` |
 
 ---
 
-## 📜 필수 코딩 규칙
-
-### 필수 어노테이션 조합
+## 🧪 테스트 규칙 (필수 패턴)
 
 ```java
-// Job Config 클래스
-@Slf4j
-@Configuration
-@RequiredArgsConstructor
-public class XxxJobConfig { }
-
-// 테스트 클래스
 @SpringBatchTest
-@SpringBootTest
-class XxxJobConfigTest { }
+@SpringBootTest(classes = {XxxJobConfig.class, TestBatchConfig.class})
+class XxxJobConfigTest {
 
-// 엔티티 클래스
-@Entity
-@Table(name = "xxx")
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Xxx { }
-```
+    @Autowired JobLauncherTestUtils jobLauncherTestUtils;
+    @Autowired JobRepositoryTestUtils jobRepositoryTestUtils;
 
-### 상수 정의 규칙
-
-```java
-// ✅ 모든 Job Config 클래스에 Chunk Size 상수 필수
-private static final int CHUNK_SIZE = 1000;
-
-// ✅ Job/Step 이름은 문자열 상수로 정의
-private static final String JOB_NAME = "dormantMemberJob";
-private static final String STEP_NAME = "dormantMemberStep";
-```
-
-### Spring Batch 4.x 스타일 (필수)
-
-```java
-// ✅ 올바른 방식 - Factory 사용
-@Slf4j
-@Configuration
-@RequiredArgsConstructor
-public class DormantMemberJobConfig {
-
-    private final JobBuilderFactory jobBuilderFactory;
-    private final StepBuilderFactory stepBuilderFactory;
-    
-    private static final int CHUNK_SIZE = 1000;
-    private static final String JOB_NAME = "dormantMemberJob";
-
-    @Bean
-    public Job dormantMemberJob() {
-        return jobBuilderFactory.get(JOB_NAME)
-            .start(dormantMemberStep())
-            .build();
-    }
-
-    @Bean
-    public Step dormantMemberStep() {
-        return stepBuilderFactory.get("dormantMemberStep")
-            .<Member, Member>chunk(CHUNK_SIZE)
-            .reader(dormantMemberReader())
-            .processor(dormantMemberProcessor())
-            .writer(dormantMemberWriter())
-            .build();
+    @BeforeEach
+    void setUp() {
+        jobRepositoryTestUtils.removeJobExecutions(); // 메타데이터 격리 — 필수!
     }
 }
 ```
 
----
+- 필요한 JobConfig만 classes에 명시 (전체 컨텍스트 금지 — 속도)
+- JobParameters가 필요한 Job은 `new JobParametersBuilder()...` + `launchJob(params)`
+- 검증은 BatchStatus/ExitStatus + **StepExecution 카운트**(read/write/filter/skip)까지
+- 메서드명 `{대상}_{시나리오}_{예상결과}` 한글 허용, AssertJ 전용, AAA 주석 (TestCraft 규약)
 
-## ⛔ 금지 사항 (NEVER)
-
-### 코드 레벨
-
-```java
-// ❌ Spring Batch 5.x 스타일 (JobRepository 직접 주입)
-@Bean
-public Job myJob(JobRepository jobRepository, Step step) { }
-
-// ❌ 하드코딩된 Chunk Size
-.<Member, Member>chunk(500)
-
-// ✅ 상수 사용
-.<Member, Member>chunk(CHUNK_SIZE)
-```
-
-### 테스트 레벨
-
-```java
-// ❌ Job 직접 주입 (여러 Job 있을 때 문제)
-@Autowired
-private Job dormantMemberJob;
-
-// ✅ JobLauncherTestUtils 사용
-@Autowired
-private JobLauncherTestUtils jobLauncherTestUtils;
-```
-
-### 설정 레벨 (application.yml)
+### application.yml 필수 설정
 
 ```yaml
-# ✅ 필수 설정
 spring:
   batch:
     job:
-      enabled: false  # 자동 실행 비활성화 (필수!)
+      enabled: false        # Job 자동 실행 금지 (필수!)
     jdbc:
-      initialize-schema: always  # 메타테이블 자동 생성
+      initialize-schema: embedded  # BATCH_* 메타테이블 자동 생성
 ```
 
 ---
 
-## 🧪 테스트 규칙
+## 📋 계획/태스크 운영 규칙 (MUST)
 
-### 테스트 클래스 필수 구조
+1. **작업 시작 전**: `docs/batch/plan/plan.md`에 계획 추가, `docs/batch/plan/task.md`에 태스크 `[ ]` 등록
+2. **커밋 시**: task.md 체크 `[x]` + 커밋 해시 병기
+3. 절차 상세: `step-commit` 스킬
 
-```java
-@SpringBatchTest
-@SpringBootTest(classes = {
-    XxxJobConfig.class, 
-    TestBatchConfig.class
-})
-class XxxJobConfigTest {
-
-    @Autowired
-    private JobLauncherTestUtils jobLauncherTestUtils;
-    
-    @Autowired
-    private JobRepositoryTestUtils jobRepositoryTestUtils;
-    
-    @BeforeEach
-    void setUp() {
-        // 이전 Job 실행 기록 삭제 (필수!)
-        jobRepositoryTestUtils.removeJobExecutions();
-    }
-    
-    @Test
-    void Job이름_시나리오_예상결과() throws Exception {
-        // given
-        JobParameters params = new JobParametersBuilder()
-            .addString("requestDate", "2025-01-01")
-            .toJobParameters();
-        
-        // when
-        JobExecution execution = jobLauncherTestUtils.launchJob(params);
-        
-        // then
-        assertThat(execution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
-    }
-}
-```
-
-### TestBatchConfig (필수 파일)
-
-```java
-@Configuration
-@EnableBatchProcessing
-public class TestBatchConfig {
-    // 테스트 전용 배치 설정
-}
-```
-
-### 테스트 메서드명 (한글 허용)
-
-```java
-// 패턴: {대상}_{시나리오}_{예상결과}
-void dormantMemberJob_1년이상미접속회원존재_휴면전환성공()
-void chunkStep_처리중예외발생_Skip처리됨()
-void partitionStep_10개파티션_병렬처리완료()
-```
-
----
-
-## 🔗 Phase별 스킬 참조
-
-| Phase | Step | 주제 | 참조 스킬 |
-|-------|------|------|----------|
-| 1 (기초) | 1-8 | Hello World, Job/Step 기본 | `docs/skills/spring-batch-core.md` |
-| 2 (핵심) | 9-18 | Chunk 처리, Reader/Writer | `docs/skills/spring-batch-chunk.md` |
-| 3 (안정성) | 19-26 | Skip, Retry, Listener | `docs/skills/spring-batch-error.md` |
-| 4 (성능) | 27-35 | Partitioning, 병렬 처리 | `docs/skills/spring-batch-performance.md` |
-| 5 (운영) | 36-42 | 모니터링, 메타테이블 | `docs/skills/spring-batch-operation.md` |
-| 6 (실전) | 43-50 | 정산, 알림 프로젝트 | `docs/skills/spring-batch-project.md` |
-
-**스킬 참조 방법**:
-```
-"docs/skills/spring-batch-chunk.md 참고해서 
- JpaPagingItemReader를 구현해줘"
-```
-
----
-
-## 📝 교육자료 생성 규칙
-
-모든 Step 구현 시 **반드시** 교육 가이드 문서를 함께 생성합니다.
-
-- 파일 위치: `docs/guides/FOR-BatchFlow-StepXX.md`
-- 상세 작성 지침: `docs/skills/education-guide.md` 참조
-- 언어: 한국어 (기술 용어 제외)
-
-> 💡 Step 구현 요청 시 교육자료 생성을 생략하려면 **"교육자료 생략"** 명시
-
----
-
-## ❓ AI 요청 가이드
-
-### 코드 생성 요청
+## 📊 커밋 규칙
 
 ```
-"Step 15의 휴면회원 전환 Job을 구현해줘
-- JpaPagingItemReader 사용
-- 1년 이상 미접속 회원 조회
-- status를 DORMANT로 변경"
+✨ feat: [Batch/Step N] 제목
+
+상세 설명
+
+학습 포인트:
+- 포인트 1
 ```
 
-### 버그 수정 요청
+- Step 단위 커밋 = 학습 단위 (프로덕션 + 테스트 3종 + 교육 문서 동시)
+- 매 커밋 전 `.\gradlew :spring-batch-onboarding:test` 그린
 
-```
-"이 에러 해결해줘
-[에러 메시지 전체 복사]
+## 📚 교육 문서 규칙
 
-현재 코드:
-[관련 코드 복사]"
-```
-
-### 리팩토링 요청
-
-```
-"이 Job을 Partitioning으로 변경해줘
-docs/skills/spring-batch-performance.md 참고"
-```
-
-### 테스트 요청
-
-```
-"DormantMemberJobConfig에 대한 테스트 작성해줘
-- 성공 케이스
-- 처리 대상 없는 케이스
-- 예외 발생 케이스"
-```
-
----
+- 파일: `docs/batch/education/FOR-BatchFlow-StepNN.md` (필수 트랙 번호 기준)
+- 템플릿: `education-doc` 스킬 (Before We Start → … → Next Steps), 문제 주도형 연결
+- Step 추가/수정 시 01 커리큘럼 문서의 표와 매핑을 함께 갱신
 
 ## 📚 참조 문서
 
 | 문서 | 경로 |
 |------|------|
-| 공통 규칙 | `루트 CLAUDE.md` |
-| 커리큘럼 전체 | `docs/00-BatchFlow-Curriculum.md` |
-| AI 프롬프트 가이드 | `docs/01-AI-Prompt-Guide.md` |
-| DB 스키마 및 초기 데이터 | `docs/04-Database-Schema-And-Data.md` |
-| 교육 가이드 | `docs/guides/FOR-BatchFlow-StepXX.md` |
+| **필수 트랙 커리큘럼 (학습 기준)** | `docs/batch/curriculum/01-BatchFlow-Essential-Curriculum.md` |
+| 전체 50-Step (심화 참조) | `docs/batch/curriculum/00-BatchFlow-Curriculum.md` |
+| 배치 테스트 패턴 | `docs/batch/skills/spring-batch-testing.md` |
+| 배치 핵심 개념 | `docs/batch/skills/spring-batch-core.md` |
+| 대량 데이터 스키마 (심화) | `docs/batch/sql/Database-Schema-And-Data.md` |

@@ -21,6 +21,10 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
 
+external:
+  payment:
+    base-url: https://pg.example.com   # 진짜 호출은 없다 — MockRestServiceServer가 가로챈다
+
 logging:
   level:
     com.webflow: DEBUG

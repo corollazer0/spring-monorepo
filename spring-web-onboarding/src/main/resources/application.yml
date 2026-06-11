@@ -27,6 +27,11 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
 
+# 외부 연동 설정 (Step 3~)
+external:
+  payment:
+    base-url: https://pg.example.com   # 가상 PG — 테스트에선 MockRestServiceServer가 대신 응답
+
 # 로깅 설정
 logging:
   level:

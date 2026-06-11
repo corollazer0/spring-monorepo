@@ -1,8 +1,13 @@
 package com.webflow.order.service;
 
+import com.webflow.common.exception.BusinessException;
 import com.webflow.common.exception.OrderNotFoundException;
 import com.webflow.common.exception.OutOfStockException;
+import com.webflow.common.exception.PaymentDeclinedException;
 import com.webflow.common.exception.ProductNotFoundException;
+import com.webflow.external.payment.PaymentApproveRequest;
+import com.webflow.external.payment.PaymentApproveResponse;
+import com.webflow.external.payment.PaymentClient;
 import com.webflow.order.dao.OrderDao;
 import com.webflow.order.domain.Order;
 import com.webflow.order.dto.OrderCreateRequest;
@@ -30,6 +35,7 @@ public class OrderService {
 
     private final OrderDao orderDao;
     private final ProductDao productDao;
+    private final PaymentClient paymentClient;
 
     public OrderResponse getOrder(Long orderId) {
         Order order = orderDao.findById(orderId);
@@ -67,5 +73,40 @@ public class OrderService {
         log.info(">>>>> [OrderService] 주문 생성. orderId={}, total={}",
                 order.getOrderId(), order.getTotalPrice());
         return OrderResponse.from(orderDao.findById(order.getOrderId()));
+    }
+
+    /**
+     * 결제 — 외부 PG 승인 후 PAID 전이. (Step 3)
+     *
+     * 규칙:
+     * 1. PENDING_PAYMENT 상태만 결제 가능 — 이중 결제 방지 (외부 호출 전에 차단!)
+     * 2. DECLINED이면 주문은 PENDING_PAYMENT 그대로 보존 (다른 카드로 재시도 가능)
+     *
+     * 의도적으로 @Transactional이 없다: 외부 HTTP 호출을 DB 트랜잭션 안에
+     * 가두면 PG가 느려질 때 커넥션을 물고 늘어진다. 상태 전이는 UPDATE 한 문장
+     * (그 자체로 원자적)이고, 승인 후에만 실행되므로 트랜잭션 묶음이 필요 없다.
+     */
+    public OrderResponse payOrder(Long orderId) {
+        Order order = orderDao.findById(orderId);
+        if (order == null) {
+            throw new OrderNotFoundException(orderId);
+        }
+        if (!Order.STATUS_PENDING_PAYMENT.equals(order.getStatus())) {
+            throw new BusinessException(
+                    "결제 대기 상태의 주문만 결제할 수 있습니다. 현재 상태: " + order.getStatus());
+        }
+
+        PaymentApproveResponse payment = paymentClient.approve(
+                new PaymentApproveRequest(orderId, order.getTotalPrice()));
+
+        if (!payment.isApproved()) {
+            // 주문은 건드리지 않는다 — PENDING_PAYMENT 보존이 곧 재시도 가능성
+            throw new PaymentDeclinedException(orderId, payment.getMessage());
+        }
+
+        orderDao.updateStatus(orderId, Order.STATUS_PAID, payment.getPaymentKey());
+        log.info(">>>>> [OrderService] 결제 완료. orderId={}, paymentKey={}",
+                orderId, payment.getPaymentKey());
+        return OrderResponse.from(orderDao.findById(orderId));
     }
 }

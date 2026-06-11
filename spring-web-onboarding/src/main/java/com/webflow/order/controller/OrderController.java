@@ -36,4 +36,10 @@ public class OrderController {
         return ResponseEntity.created(URI.create("/api/orders/" + response.getOrderId()))
                 .body(response);
     }
+
+    /** 결제 — POST /api/orders/{orderId}/payment (Step 3) */
+    @PostMapping("/{orderId}/payment")
+    public OrderResponse payOrder(@PathVariable Long orderId) {
+        return orderService.payOrder(orderId);
+    }
 }

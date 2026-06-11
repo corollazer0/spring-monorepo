@@ -31,6 +31,9 @@ mybatis:
 external:
   payment:
     base-url: https://pg.example.com   # 가상 PG — 테스트에선 MockRestServiceServer가 대신 응답
+    # 타임아웃 (Step 4): 없으면 PG 장애 = 우리 스레드 풀 고갈 = 전면 장애!
+    connect-timeout-millis: 3000   # 연결 수립까지
+    read-timeout-millis: 5000      # 연결 후 첫 응답까지
 
 # 로깅 설정
 logging:

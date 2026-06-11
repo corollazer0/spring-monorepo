@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * - Product/OrderNotFound    → 404
  * - OutOfStock               → 409 (자원 상태와 충돌)
  * - 그 외 BusinessException   → 400
+ * - ExternalService 장애      → 503 (우리 잘못도 사용자 잘못도 아닌 "일시적" — Step 4)
  * - 그 외 전부                → 500 (내부 정보 은닉)
- *   (외부 연동 장애 503은 Step 4에서 추가된다)
  */
 @Slf4j
 @RestControllerAdvice
@@ -51,6 +51,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBusiness(BusinessException e) {
         log.warn(">>>>> [WARN] 비즈니스 규칙 위반: {}", e.getMessage());
         return errorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler(ExternalServiceException.class)
+    public ResponseEntity<ErrorResponse> handleExternalService(ExternalServiceException e) {
+        // 장애는 error 레벨 + 원인(cause) 스택까지 — 재시도 끝에 포기한 사건이다
+        log.error(">>>>> [ERROR] 외부 서비스 장애: {}", e.getMessage(), e);
+        return errorResponse(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

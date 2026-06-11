@@ -12,8 +12,8 @@
 
 - [x] Step 1: 스캐폴드 + 커머스 도메인 (MyBatis/MSSQL) — `a09868e`
 - [x] Step 2: 목록 API — 페이징·검색·정렬 — `abe0fe8`
-- [x] Step 3: 외부 결제 API 연동 기초 (MockRestServiceServer) — (이번 커밋)
-- [ ] Step 4: 타임아웃·재시도·장애 격리
+- [x] Step 3: 외부 결제 API 연동 기초 (MockRestServiceServer) — `e496b27`
+- [x] Step 4: 타임아웃·재시도·장애 격리 — (이번 커밋)
 - [ ] Step 5: 파일 업로드/다운로드
 - [ ] Step 6: 캐싱 (@Cacheable + 무효화)
 - [ ] Step 7: 스케줄링 — 미결제 주문 정리

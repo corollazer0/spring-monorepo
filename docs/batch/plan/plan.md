@@ -38,10 +38,11 @@
 ## Plan 2. 다음 후보 (미착수)
 
 - [ ] 학습자 파일럿 및 피드백 반영
-- [ ] (선택) Phase 4~6 심화 Step 추가: 비동기 처리, JobOperator/스케줄링, 대량 알림 프로젝트
+- [x] ~~(선택) Phase 4~6 심화 Step 추가: 비동기 처리, JobOperator~~ → Plan 3으로 구현 완료 (Step 16~17)
+- [ ] (선택) 대량 알림 발송 제2 캡스톤 (50-Step 47~50)
 - [ ] (선택) 대량 데이터 성능 실습: 기존 10만건 스키마 문서 기반 성능 측정 Step
 
-## Plan 3. 성능/운영 심화 — Step 16~17 (2026-06-12 사용자 요청으로 착수)
+## Plan 3. 성능/운영 심화 — Step 16~17 (2026-06-12 착수 → 같은 날 ✅ 완료)
 
 ### 배경/목표
 50-Step 문서의 미구현 성능/운영 파트를 기존 심화(14~15) 형식으로 압축 추가한다.
@@ -60,3 +61,8 @@
 | 의존성 | spring-batch-integration (Async 2종의 출처, 버전 Boot BOM) | 코어에 없다는 것 자체가 함정/교육 포인트 |
 | Step 17 재기동 데모 | 정적 스위치(BROKEN)로 환경 장애 시뮬레이션 → 복구 후 operator.restart | 동일 파라미터 재시작의 결정적 데모 (교보재 규약 준수: 정리 의무) |
 | JobRegistry | JobRegistryBeanPostProcessor를 OpsDemoJobConfig에 명시 등록 | 등록 누락 = NoSuchJobException 함정의 교육화 |
+
+### 구현 결과 (2026-06-12)
+- Step 16 `f3abdaa` / Step 17 `3c0d68b` — 매 커밋 모듈 테스트 그린 (115건, +10)
+- 계획 대비 전부 계획대로 구현. JobOperator는 Boot 자동구성(SimpleJobOperator) 사용 확인
+- spring-troubleshoot 진단표에 배치 섹션 신설 (5개 함정 자산화)

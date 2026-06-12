@@ -23,7 +23,7 @@
 - [x] Step 15(심화): Partitioning — `263bd17`
 - [x] 초보자 README + plan/task 문서 — `6104efc`
 
-## Plan 3: 성능/운영 심화 (Step 16~17) — 🔄 진행 중
+## Plan 3: 성능/운영 심화 (Step 16~17) — ✅ 완료
 
 - [x] Step 16(심화): 비동기 처리 — AsyncItemProcessor/Writer + 동기 vs 비동기 성능 비교 (50-Step 30~34) — `f3abdaa`
 - [x] Step 17(심화): JobOperator와 실행 이력 — 운영자의 콘솔 (50-Step 36~37·39) — `3c0d68b`

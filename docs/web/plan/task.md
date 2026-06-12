@@ -8,7 +8,7 @@
 
 - [x] 정체성/주제/DB/형식 의사결정 (인터뷰) + 커리큘럼 초안(필수 9 + 심화) — `fc4430b`
 
-## Plan 2: 필수 트랙 구현 — 🔄 진행 중
+## Plan 2: 필수 트랙 구현 — ✅ 완료
 
 - [x] Step 1: 스캐폴드 + 커머스 도메인 (MyBatis/MSSQL) — `a09868e`
 - [x] Step 2: 목록 API — 페이징·검색·정렬 — `abe0fe8`
@@ -20,7 +20,7 @@
 - [x] Step 8: Actuator — 운영의 눈 — `35b3465`
 - [x] Step 9: 캡스톤 — 배송 조회 연동 자율 설계 — `58f47d9`
 - [x] CLAUDE.md 신규 / 커리큘럼·FOR 문서 (Step 1~9, 각 Step 커밋에 포함)
-- [x] 초보자 README + 루트 README Web 행 ✅ + plan/task 마감 — (이번 커밋)
+- [x] 초보자 README + 루트 README Web 행 ✅ + plan/task 마감 — `9daf7c5`
 
 ## Plan 3: 심화 — ✅ 완료
 

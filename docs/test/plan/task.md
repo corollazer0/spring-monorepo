@@ -34,7 +34,7 @@
 
 - [x] 완전 초보자용 실행 가이드(모듈 README.md) 신설 + 루트 README 링크 — `2e97d76`
 
-## Plan 5: 심화 확장 (Step 13~14) — 🔄 진행 중
+## Plan 5: 심화 확장 (Step 13~14) — ✅ 완료
 
 - [x] Step 13(심화): ArchUnit — 아키텍처를 테스트로 봉인 (계층 의존/네이밍/모듈 격리) — `9fefcd1`
 - [x] Step 14(심화): Spring REST Docs — 테스트가 문서를 만든다 — `b0d4e4c`

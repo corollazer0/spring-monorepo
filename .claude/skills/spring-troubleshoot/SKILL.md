@@ -54,6 +54,7 @@ description: Spring 애플리케이션/테스트의 원인 모를 동작(401/403
 | 증상 | 1순위 의심 |
 |------|-----------|
 | git commit -m 이 pathspec 오류 | PowerShell 5.1이 인자 내 큰따옴표를 깨뜨림 — 메시지에 " 금지 |
+| 코드 무변경인데 initializationError/NoClassDefFoundError (이전엔 그린) | 증분 빌드 산출물/데몬 오염 — `gradlew --stop` + 해당 모듈 `clean` 후 재실행 (실제 발생 사례) |
 | 빌드는 되는데 한글 출력 깨짐 | 콘솔 코드페이지(표시 문제) vs 실제 데이터 깨짐(인코딩 설정)을 구분하라 |
 
 ## 3. 원칙

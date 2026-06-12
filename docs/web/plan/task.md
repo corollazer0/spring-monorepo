@@ -22,6 +22,6 @@
 - [x] CLAUDE.md 신규 / 커리큘럼·FOR 문서 (Step 1~9, 각 Step 커밋에 포함)
 - [x] 초보자 README + 루트 README Web 행 ✅ + plan/task 마감 — (이번 커밋)
 
-## 차기 회차 (이월)
+## Plan 3: 심화 — ✅ 완료
 
-- [ ] Step 10(심화): WebClient 또는 Resilience4j — plan.md Plan 2 구현 결과 참조
+- [x] Step 10(심화): 서킷 브레이커 (Resilience4j 1.7.1, WebClient 미채택 — plan.md Plan 3) — (이번 커밋)

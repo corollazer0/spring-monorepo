@@ -10,7 +10,7 @@ git 히스토리 자체가 학습 경로가 되도록 설계되었습니다.
 |------|------|------|--------|
 | [`spring-test-onboarding`](./spring-test-onboarding) | **TestCraft** — JUnit5 / SpringBootTest 테스트 기본기 (일주일 과정) | ✅ 전 과정 완성 | [커리큘럼](./docs/test/curriculum/00-TestCraft-Curriculum.md) · [실행 가이드](./spring-test-onboarding/README.md) |
 | [`spring-batch-onboarding`](./spring-batch-onboarding) | **BatchFlow** — Spring Batch 배치 기본기 (필수 13 + 심화 2, 약 2주) | ✅ 필수 트랙 완성 | [커리큘럼](./docs/batch/curriculum/01-BatchFlow-Essential-Curriculum.md) · [실행 가이드](./spring-batch-onboarding/README.md) |
-| [`spring-web-onboarding`](./spring-web-onboarding) | **WebFlow** — 실무 API 종합 (외부연동/파일/캐싱/스케줄링/Actuator, 필수 9 Step) | ✅ 필수 트랙 완성 | [커리큘럼](./docs/web/curriculum/00-WebFlow-Curriculum.md) · [실행 가이드](./spring-web-onboarding/README.md) |
+| [`spring-web-onboarding`](./spring-web-onboarding) | **WebFlow** — 실무 API 종합 (외부연동/파일/캐싱/스케줄링/Actuator, 필수 9 + 심화 1) | ✅ 전 과정 완성 | [커리큘럼](./docs/web/curriculum/00-WebFlow-Curriculum.md) · [실행 가이드](./spring-web-onboarding/README.md) |
 
 ## 공통 기술 스택
 
@@ -69,7 +69,7 @@ Spring Batch의 Job/Step/Tasklet부터 Chunk, 오류 제어, 성능 최적화까
 
 - **스택**: MyBatis(XML) · H2(MODE=MSSQLServer) · RestTemplate(Builder) · spring-retry · Actuator · **Security 없음**
 - **도메인**: 미니 커머스 (상품/주문 + 외부 결제·배송 연동)
-- **구조**: 필수 Step 1~9 (도메인 → 목록 API → 외부 결제 → 장애 생존 → 파일 → 캐싱 → 스케줄링 → Actuator → 배송 조회 캡스톤)
+- **구조**: 필수 Step 1~9 (도메인 → 목록 API → 외부 결제 → 장애 생존 → 파일 → 캐싱 → 스케줄링 → Actuator → 배송 조회 캡스톤) + 심화 Step 10 (Resilience4j 서킷 브레이커)
 - **시그니처 기법**: @RestClientTest+MockRestServiceServer(진짜 HTTP 금지), ExpectedCount로 재시도 횟수 봉인, @TempDir 파일 격리, verify(times)로 캐시 적중 증명, 시각 주입 스케줄 테스트
 
 | 진입로 | 경로 |

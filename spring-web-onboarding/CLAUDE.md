@@ -11,7 +11,7 @@
 약 2주(하루 1~2시간, 자기주도) 안에 갖추게 하는 학습 모듈입니다.
 TestCraft(테스트 기본기) 수료를 전제로 합니다.
 
-- **커리큘럼**: `docs/web/curriculum/00-WebFlow-Curriculum.md` (필수 Step 1~9 + 심화)
+- **커리큘럼**: `docs/web/curriculum/00-WebFlow-Curriculum.md` (필수 Step 1~9 + 심화 Step 10 서킷 브레이커)
 - 도메인: **미니 커머스** (상품/주문 + 외부 결제·배송 연동)
 - 학습 철학: 문제 주도형 + example/exercise/answer 3종 (TestCraft·BatchFlow와 동일)
 
@@ -26,6 +26,8 @@ MyBatis:        2.3.2 (3.x 금지 — Boot 3 전용)
 H2:             인메모리 + MODE=MSSQLServer (DB명 webdb)
 RestTemplate:   외부 연동 (RestTemplateBuilder 주입 — @RestClientTest 호환)
 spring-retry:   재시도 (Boot BOM 관리, RetryTemplate 프로그래매틱 사용)
+Resilience4j:   1.7.1 서킷 브레이커 (Java 8 호환 최종 라인 — 2.x는 Java 17 전용!)
+                코어 라이브러리 프로그래매틱 사용 (spring-boot2 스타터 AOP 미사용)
 Security:       ❌ 없음! (TestCraft에서 다룸 — 이 모듈은 실무 잡기술에 집중)
 JPA:            ❌ 사용 금지
 ```

@@ -70,5 +70,23 @@ Plan 1 커리큘럼대로 Step 단위 커밋(`✨ feat: [Web/Step N]`)으로 구
   - 캐시 무효화 3경로: placeOrder(키), uploadProductImage(키), cancelStaleOrders(allEntries)
   - 캡스톤 배송사 404 → PREPARING 번역 (외부 상태코드의 비즈니스 번역이 판단 포인트)
   - DeliveryController 분리 — 기존 @WebMvcTest 슬라이스 불침범
-- **심화 Step 10 결정: 차기 회차로 이월.** 필수 9 Step + 초보자 README로 1회차 분량 충분.
-  소재(WebClient/Resilience4j/Redis/ShedLock)는 FOR-WebFlow-Step09 6장에 안내로 남김.
+- ~~심화 Step 10 결정: 차기 회차로 이월~~ → **사용자 요청으로 같은 회차에 진행 (Plan 3)**
+
+## Plan 3. 심화 Step 10 — 서킷 브레이커 (2026-06-12 사용자 요청으로 즉시 진행)
+
+### 소재 의사결정: Resilience4j 서킷 브레이커 채택 / WebClient 미채택
+| 기준 | 판단 |
+|------|------|
+| 문제주도형 연결 | 재시도(Step 4)의 한계("죽은 서버 폭격")에서 자연스럽게 출발 ✅ |
+| 모듈 정체성 | RestTemplate 표준 유지 — WebClient는 리액티브 스택 도입으로 충돌 ❌ |
+| Java 8 제약 | resilience4j 1.7.x가 Java 8 호환 최종 라인 (2.x는 Java 17) ✅ |
+| 하우스 스타일 | 코어 프로그래매틱 사용 — RetryTemplate(AOP 미사용)과 동일 철학 ✅ |
+
+### 구현 설계
+- 적용 대상: **DeliveryClient** (조회 GET = 멱등, 캡스톤 산출물 강화)
+- 합성 순서: retry( circuitBreaker( http ) ) — 시도별 기록, CallNotPermitted는 비재시도
+- recordExceptions를 인프라 장애(타임아웃·5xx)로 한정 — 404(송장 미등록)는 정상 호출
+- **minimumNumberOfCalls(10)**: step09 기존 테스트(누적 기록 7건)가 평가 미달로 무영향
+  (기존 Step 테스트 무수정 원칙 유지)
+- 테스트 기법: reset() 상태 격리 + transitionTo() 상태 주입(10초 대기 대체) +
+  기대 선언 0개로 "HTTP 0회" 증명

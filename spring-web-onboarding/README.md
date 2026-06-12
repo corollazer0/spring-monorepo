@@ -77,6 +77,7 @@ curl http://localhost:8080/actuator/health
   도메인 → 목록 API → 외부 결제 → 장애 생존 → 파일 → 캐싱 → 스케줄링 → Actuator → 캡스톤
 - **Step 9 캡스톤**은 순서가 다릅니다 — answer를 보기 전에 요구사항만으로
   스스로 설계하세요 (FOR-WebFlow-Step09.md의 진행 방법 참고)
+- **심화 Step 10** (선택): Resilience4j 서킷 브레이커 — 재시도 너머의 장애 대응
 
 ## 5. 자주 막히는 것 (FAQ)
 

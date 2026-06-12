@@ -16,6 +16,8 @@
 | Filter/Interceptor 내부 분기 | 서블릿 Mock 3총사 (new로 직접) | 없음 | ms | Step 7 |
 | 빈 연결 + 전체 흐름 (가짜 HTTP) | `@SpringBootTest` + `@AutoConfigureMockMvc` + `@Transactional` | 전부 | 수 초 | Step 8 |
 | 진짜 HTTP / 진짜 로그인 / 쿠키 | `@SpringBootTest(RANDOM_PORT)` + `TestRestTemplate` | 전부+Tomcat | 수 초+ | Step 8 |
+| 구조 규칙 (계층 의존/네이밍/모듈 격리) | ArchUnit `ClassFileImporter` + `noClasses()/classes()` | 없음 (바이트코드 분석) | ~수 초 (import 1회) | Step 13 |
+| API 문서 + 계약 (필드 누락/허위 검증) | `@WebMvcTest` + `@AutoConfigureRestDocs` + `document()` | MVC 레이어 | ~2s | Step 14 |
 
 **기본 원칙: 표의 위쪽(빠른 것)에 케이스를 많이, 아래쪽(느린 것)에 여정만 소수 정예.**
 
@@ -41,6 +43,7 @@
 | `@WebMvcTest(X.class)` | HTTP 계약 검증 | `@Import(SecurityConfig.class)` 없으면 전부 401! |
 | `@MockBean` | 컨테이너의 빈을 Mock으로 교체 | 구성이 다르면 컨텍스트 캐시가 깨져 느려진다 |
 | `jsonPath("$.field")`, `header().string(...)`, `andDo(print())` | 응답 검증/디버깅 | |
+| `@AutoConfigureRestDocs` + `andDo(document(...))` | 테스트 통과 시에만 문서 스니펫 생성 | 경로 변수는 `RestDocumentationRequestBuilders`로! (Step 14) |
 
 ### 보안 (spring-security-test)
 | 도구 | 용도 |
@@ -74,6 +77,8 @@
 | 혼자 돌리면 통과, 같이 돌리면 실패 | ThreadLocal(SecurityContextHolder/MDC) 미정리 (Step 7) |
 | UnnecessaryStubbingException | 그 테스트에서 안 일어나는 호출을 stubbing (Step 2) |
 | 테스트가 갑자기 느려짐 | @MockBean 구성 차이로 컨텍스트 캐시 무효화 (Step 11) |
+| REST Docs "urlTemplate not found" | `MockMvcRequestBuilders` 사용 — pathParameters는 `RestDocumentationRequestBuilders` (Step 14) |
+| REST Docs 필드 누락/잉여로 실패 | 문서↔페이로드 불일치(설계된 동작!) — 스텁 응답의 null 필드도 의심 (Step 14) |
 
 ---
 

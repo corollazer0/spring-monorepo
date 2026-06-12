@@ -26,7 +26,7 @@
 ## Plan 3: 성능/운영 심화 (Step 16~17) — 🔄 진행 중
 
 - [x] Step 16(심화): 비동기 처리 — AsyncItemProcessor/Writer + 동기 vs 비동기 성능 비교 (50-Step 30~34) — `f3abdaa`
-- [x] Step 17(심화): JobOperator와 실행 이력 — 운영자의 콘솔 (50-Step 36~37·39) — (이번 커밋)
+- [x] Step 17(심화): JobOperator와 실행 이력 — 운영자의 콘솔 (50-Step 36~37·39) — `3c0d68b`
 
 ## Plan 2: 다음 후보 — 📝 미착수
 

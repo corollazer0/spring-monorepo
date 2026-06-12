@@ -42,7 +42,7 @@ Security가 없으므로 @WebMvcTest에 `@Import(SecurityConfig)`/`with(csrf())`
 ```
 src/main/java/com/webflow/
 ├── WebFlowApplication.java
-├── config/                  # RestClientConfig(Step 3), CacheConfig(Step 6) 등
+├── config/                  # CacheConfig(Step 6), SchedulingConfig(Step 7 — 테스트에선 off)
 ├── common/exception/        # BusinessException 계열 + ErrorResponse + Handler
 ├── product/                 # domain/ dao/ service/ controller/ dto/
 ├── order/                   # domain/ dao/ service/ controller/ dto/
@@ -53,7 +53,7 @@ src/main/java/com/webflow/
 └── scheduler/               # Step 7: 정리 스케줄러
 
 src/test/java/com/webflow/
-├── step01/ ~ step09/        # {example, exercise, answer} 3종 (TestCraft 규약)
+├── step01/ ~ step10/        # {example, exercise, answer} 3종 (TestCraft 규약 — step10은 심화)
 └── support/                 # 공통 테스트 지원
 ```
 

@@ -7,21 +7,25 @@
 
 ## 🏗️ 프로젝트 구조 (Monorepo)
 
-이 프로젝트는 두 개의 **독립적인 모듈**로 구성됩니다.
+이 프로젝트는 세 개의 **독립적인 학습 모듈**로 구성됩니다.
 
 ```
-spring-onboarding/                    # 루트
+spring-monorepo/                      # 루트
 ├── CLAUDE.md                        # 이 파일 (공통 규칙)
-├── spring-web-onboarding/            # [Web] 실시간 API 서버
-│   └── CLAUDE.md                    # 웹 모듈 전용 규칙
-└── spring-batch-onboarding/          # [Batch] 대용량 배치 처리
-    └── CLAUDE.md                    # 배치 모듈 전용 규칙
+├── docs/{test,batch,web}/           # 모듈별 커리큘럼·교육·plan 문서
+├── spring-test-onboarding/           # [Test] TestCraft — 테스트 기본기
+│   └── CLAUDE.md
+├── spring-batch-onboarding/          # [Batch] BatchFlow — 대용량 배치 처리
+│   └── CLAUDE.md
+└── spring-web-onboarding/            # [Web] WebFlow — 실무 API 종합
+    └── CLAUDE.md
 ```
 
-| 모듈 | 목적 | 상세 규칙 |
+| 모듈 | 목적 (기준 패키지) | 상세 규칙 |
 |------|------|----------|
-| `spring-web-onboarding` | 실시간 API 서버 | `./spring-web-onboarding/CLAUDE.md` |
-| `spring-batch-onboarding` | 대용량 배치 처리 | `./spring-batch-onboarding/CLAUDE.md` |
+| `spring-test-onboarding` | TestCraft — 테스트 기본기 (`com.testonboarding`) | `./spring-test-onboarding/CLAUDE.md` |
+| `spring-batch-onboarding` | BatchFlow — 배치 처리 (`com.batchflow`) | `./spring-batch-onboarding/CLAUDE.md` |
+| `spring-web-onboarding` | WebFlow — 실무 API 종합 (`com.webflow`) | `./spring-web-onboarding/CLAUDE.md` |
 
 ---
 
@@ -33,28 +37,31 @@ spring-onboarding/                    # 루트
 
 ```java
 // ❌ 절대 금지 - Web에서 Batch 참조
-// spring-web-onboarding 모듈에서:
+// spring-web-onboarding(com.webflow) 모듈에서:
 import com.batchflow.job.dormant.DormantMemberJobConfig;  // NEVER!
 
-// ❌ 절대 금지 - Batch에서 Web 참조  
-// spring-batch-onboarding 모듈에서:
-import com.webonboarding.controller.MemberController;    // NEVER!
+// ❌ 절대 금지 - Batch에서 Web/Test 참조
+// spring-batch-onboarding(com.batchflow) 모듈에서:
+import com.webflow.product.controller.ProductController;  // NEVER!
+import com.testonboarding.member.service.MemberService;   // NEVER!
 ```
 
-- `Web` 모듈 작업 시 → `Batch` 모듈 코드를 **절대 import/참조 금지**
-- `Batch` 모듈 작업 시 → `Web` 모듈의 Controller/Service **호출 금지**
+- 어느 모듈에서 작업하든 다른 두 모듈(`com.testonboarding` / `com.batchflow` / `com.webflow`)의
+  코드를 **절대 import/참조 금지**
+- 이 규칙은 ArchUnit 테스트로도 봉인되어 있다 (Test 심화 Step 13 — 어기면 빌드 실패)
 
 ### 2. Dependency Check (의존성 확인)
 
 - `build.gradle`에 명시되지 않은 다른 모듈의 클래스는 **사용 불가**
-- 현재 두 모듈은 `implementation project(...)` 로 **연결되어 있지 않음**
+- 현재 세 모듈은 `implementation project(...)` 로 **연결되어 있지 않음**
 
 ### 3. Context Switching (컨텍스트 전환)
 
 | 사용자 요청 | 작업 디렉토리 | 참조할 규칙 |
 |-------------|--------------|-------------|
-| "웹 구현해줘" | `./spring-web-onboarding` | `spring-web-onboarding/CLAUDE.md` |
-| "배치 Job 만들어줘" | `./spring-batch-onboarding` | `spring-batch-onboarding/CLAUDE.md` |
+| "테스트 작성해줘", "[Test] ..." | `./spring-test-onboarding` | `spring-test-onboarding/CLAUDE.md` |
+| "배치 Job 만들어줘", "[Batch] ..." | `./spring-batch-onboarding` | `spring-batch-onboarding/CLAUDE.md` |
+| "API 구현해줘", "[Web] ..." | `./spring-web-onboarding` | `spring-web-onboarding/CLAUDE.md` |
 
 ---
 
@@ -195,8 +202,8 @@ GET /api/members/{id} 엔드포인트 추가
 | 모듈 | 파일 위치 | 주요 내용 |
 |------|----------|----------|
 | Test | `spring-test-onboarding/CLAUDE.md` | TestCraft 학습 모듈, example/exercise/answer 규약, plan/task 운영 |
-| Batch | `spring-batch-onboarding/CLAUDE.md` | Spring Batch 설정, Job/Step 규칙, 테스트 규칙 |
-| Web | `spring-web-onboarding/CLAUDE.md` | Controller/Service 규칙, API 설계 규칙 *(추후 추가)* |
+| Batch | `spring-batch-onboarding/CLAUDE.md` | Spring Batch 4.x 규칙(5.x 금지), Job/Step 규칙, 배치 테스트 패턴 |
+| Web | `spring-web-onboarding/CLAUDE.md` | 외부 연동/파일/캐싱/스케줄링 규칙, Security 없음·JPA 금지 |
 
 ---
 
@@ -238,7 +245,7 @@ GET /api/members/{id} 엔드포인트 추가
 
 ### 모듈 미명시 시 AI 행동
 
-1. 요청 내용에서 모듈 추론 (Job, Batch → Batch / API, Controller → Web)
+1. 요청 내용에서 모듈 추론 (Job/Batch → Batch / API·외부연동·파일 → Web / 테스트 기법·Security → Test)
 2. 추론 불가 시 → 사용자에게 모듈 확인 질문
 
 ### 버그 수정 요청
@@ -255,8 +262,12 @@ GET /api/members/{id} 엔드포인트 추가
 
 ## 🔗 관련 문서
 
+모듈별 문서는 전부 루트 `docs/{test,batch,web}/` 아래에 있다 (curriculum / education / plan).
+
 | 문서 | 경로 |
 |------|------|
-| Batch 커리큘럼 | `spring-batch-onboarding/docs/00-BatchFlow-Curriculum.md` |
-| Batch AI 가이드 | `spring-batch-onboarding/docs/01-AI-Prompt-Guide.md` |
-| Batch DB 스키마 | `spring-batch-onboarding/docs/04-Database-Schema-And-Data.md` |
+| Test 커리큘럼 | `docs/test/curriculum/00-TestCraft-Curriculum.md` |
+| Batch 커리큘럼 (학습 기준) | `docs/batch/curriculum/01-BatchFlow-Essential-Curriculum.md` |
+| Web 커리큘럼 | `docs/web/curriculum/00-WebFlow-Curriculum.md` |
+| 모듈별 계획/태스크 (Living) | `docs/{test,batch,web}/plan/{plan.md,task.md}` |
+| Batch DB 스키마 (대량 데이터 참조) | `docs/batch/sql/Database-Schema-And-Data.md` |

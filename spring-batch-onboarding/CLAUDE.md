@@ -25,6 +25,7 @@ Spring Batch:   4.3.x (Boot 2.7 내장 — 5.x 스타일 금지!)
 H2:             Boot BOM 관리, 인메모리 + MODE=MSSQLServer (실무 DB가 MS-SQL)
 JUnit:          5.x + spring-batch-test (@SpringBatchTest)
 Lombok:         루트 build.gradle이 제공
+Integration:    spring-batch-integration (심화 Step 16 — AsyncItemProcessor/Writer의 출처, Boot BOM 관리)
 JPA:            ❌ 사용 금지 (JDBC 기반 — JdbcCursor/PagingItemReader, JdbcBatchItemWriter)
 ```
 

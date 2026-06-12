@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Write, Edit, Bash
 
 1. **템플릿**: 범용 교육 문서는 `education-doc` 스킬의 템플릿과 톤을 따른다.
    TestCraft(spring-test-onboarding)의 Step 문서는 `testcraft-step-doc` 스킬을 따른다 — 둘을 혼동하지 말 것.
+   BatchFlow/WebFlow의 Step 문서(FOR-*)는 education-doc 템플릿 + 해당 모듈 `CLAUDE.md`의 교육 문서 규칙
+   (파일명·커리큘럼 표 동시 갱신)을 따른다.
 2. **코드를 읽지 않고 문서를 쓰지 않는다**: 설명할 코드를 직접 읽고, 가능하면 실행(테스트/앱)해 실제 출력을 캡처해 문서에 싣는다. 추측으로 쓴 예시는 거짓 문서다.
 3. **문제 주도 서술**: 해결책보다 "왜 필요한가(앞 단계의 한계, 실제 문제)"를 먼저 서술한다. 독자가 문제를 느낀 뒤에 도구를 소개한다.
 4. **실제 버그가 최고의 교재**: 작업 중 실제로 겪은 실수/함정을 Lessons Learned(증상→원인→해결→교훈)로 기록한다. 매끈하게 성공한 척하지 않는다.

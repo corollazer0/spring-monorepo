@@ -14,6 +14,7 @@ description: Spring 레이어드 아키텍처로 기능을 구현할 때 사용.
 | Service | 비즈니스 규칙(존재 검증, 소유권 검증, 정책), 트랜잭션 경계 | HTTP 개념(상태코드/요청객체) 침투 |
 | DAO (@Mapper) | SQL 실행만 — 인터페이스 + XML | 비즈니스 분기 |
 | DTO | 요청(검증 어노테이션)/응답(static from(domain)) 분리, 도메인 직접 노출 금지 | 응답 DTO에 비밀번호 등 민감정보 |
+| 외부 API Client (`external/{대상}/`) | 외부 호출 + 번역(타임아웃·재시도, 상태코드→우리 의미, 기술 예외→우리 예외), 외부 계약 전용 DTO | 도메인/내부 DTO를 외부에 직접 노출, 비즈니스 판단 |
 
 핵심 규칙: **데이터 소유권 검증("작성자 본인만")은 Service의 책임** — Security(URL 인가)가 아니다.
 
@@ -36,4 +37,5 @@ description: Spring 레이어드 아키텍처로 기능을 구현할 때 사용.
 - Java 8 전용: `var`/`record`/Text Block/`Stream.toList()`/switch expression/`jakarta.*` **금지**, `javax.*` 사용
 - 버전 업그레이드 금지 — BOM이 관리하는 버전을 덮어쓰지 않는다 (모듈 CLAUDE.md의 고정표 참조)
 
-> 이 레포의 모범 구현: `spring-test-onboarding/src/main/java/com/testonboarding/` (board/member/comment/web 패키지).
+> 이 레포의 모범 구현: `spring-test-onboarding`의 `com.testonboarding` (board/member/comment/web — 보안 포함),
+> `spring-web-onboarding`의 `com.webflow` (external 클라이언트 계층, 파일/캐시/스케줄 — 실무 API 종합).

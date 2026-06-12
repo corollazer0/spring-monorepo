@@ -91,6 +91,11 @@ Validation / Security / Filter
 |------|------|------|----------|------|
 | 10 | JWT 인증 필터 만들고 테스트하기 | 세션을 못 쓰는 환경(모바일/외부 API)이라면? | jjwt, 토큰 생성/만료/위조 테스트, Bearer E2E | 2h |
 | 11 | 테스트 품질 끌어올리기 | 테스트가 늘수록 느려지고 준비 코드가 중복된다 | 커스텀 `@WithMockMember`, Fixture 패턴, 컨텍스트 캐싱 | 1.5h |
+| 13 | ArchUnit — 아키텍처를 테스트로 봉인 | 리뷰에서 매번 잡는 구조 규칙, 사람 말고 빌드가 지키게 | `noClasses()/classes()` 규칙, 계층/네이밍/모듈 격리, because | 1.5h |
+| 14 | Spring REST Docs — 테스트가 문서를 만든다 | 위키 문서는 작성한 날부터 썩는다 | `document()`, requestFields 계약 검증, RestDocumentationRequestBuilders | 1.5h |
+
+> 심화 트랙의 흐름: 인증(10) → 품질(11) → 구조(13) → 문서(14).
+> (Step 12는 필수 코스의 View 테스트 — 번호만 심화 사이에 있다)
 
 ---
 

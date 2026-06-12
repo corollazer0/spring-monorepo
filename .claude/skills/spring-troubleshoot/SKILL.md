@@ -38,6 +38,8 @@ description: Spring 애플리케이션/테스트의 원인 모를 동작(401/403
 | E2E 첫 실행만 통과 | RANDOM_PORT 롤백 불가 + AFTER_TEST_METHOD 정리 누락 |
 | 빌드 급감속 | @MockBean 조합 차이로 컨텍스트 캐시 무효화 — 기동 횟수를 로그에서 세어보라 |
 | UnnecessaryStubbingException | 그 테스트에서 안 일어나는 stubbing — 시나리오 오해 신호 (lenient로 끄지 말 것) |
+| REST Docs "urlTemplate not found" | MockMvcRequestBuilders 사용 — pathParameters는 RestDocumentationRequestBuilders 필수 (static import 함정) |
+| REST Docs 필드 누락/잉여 실패 | 문서와 페이로드 불일치(설계된 동작!) — 스텁 응답의 null 필드도 의심 (JSON에서 빠짐) |
 
 ### 배치 (Spring Batch)
 | 증상 | 1순위 의심 |

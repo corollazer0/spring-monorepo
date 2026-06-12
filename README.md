@@ -47,7 +47,7 @@ Java 1.8 · Spring Boot 2.7.17 · Gradle 8.x · JUnit 5 · Lombok
 **목표**: 일주일(하루 1~2시간, 자기주도) 안에 전 레이어의 테스트를 스스로 설계·작성하는 기본기
 
 - **스택**: Spring Security(세션+JWT) · MyBatis(XML) · H2(**MODE=MSSQLServer** — 실무 MS-SQL 대응) · Mockito · AssertJ
-- **구조**: 필수 Step 1~9 (순수 단위 → Mockito → @MybatisTest → @WebMvcTest → Validation/예외 → Security → Filter/Interceptor → E2E → 캡스톤) + 심화 Step 10~11 (JWT, 테스트 품질)
+- **구조**: 필수 Step 1~9, 12 (순수 단위 → Mockito → @MybatisTest → @WebMvcTest → Validation/예외 → Security → Filter/Interceptor → E2E → 캡스톤 → View) + 심화 Step 10~14 (JWT → 테스트 품질 → ArchUnit 구조 봉인 → REST Docs 문서화)
 - **학습 방식**: Step마다 `example`(완성 모범) / `exercise`(@Disabled TODO 골격) / `answer`(모범답안) 3종 패키지
 
 | 진입로 | 경로 |

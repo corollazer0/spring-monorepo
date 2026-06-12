@@ -26,6 +26,8 @@ H2:                  Boot BOM 관리, MODE=MSSQLServer
 JUnit:               5.8.x (Boot BOM 관리)
 Mockito:             4.5.x (Boot BOM 관리 — 5.x는 Java 11 필수, 업그레이드 금지)
 jjwt:                0.11.5 (심화 Step 10에서만, 0.12.x 금지)
+ArchUnit:            1.2.1 (심화 Step 13 — 코어만, junit5 엔진 미사용: 3종 규약 정합)
+REST Docs:           spring-restdocs-mockmvc (심화 Step 14, Boot BOM 관리 — 스니펫+검증까지, HTML 변환 범위 외)
 Lombok:              루트 build.gradle이 제공 (재선언 금지)
 ```
 
@@ -57,7 +59,7 @@ src/test/java/com/testonboarding/
 │   ├── example/   # 완성된 베스트프랙티스 — 항상 실행·통과
 │   ├── exercise/  # @Disabled TODO 골격 — 학습자가 채움 (컴파일은 항상 성공)
 │   └── answer/    # exercise 모범답안 — 항상 실행·통과 (정답이 썩지 않음을 빌드가 보증)
-└── advanced/step10/ ~ step11/   # 심화 코스 (동일 3종 구조)
+└── advanced/step10/ ~ step14/   # 심화 코스 (동일 3종 구조 — 10 JWT, 11 품질, 13 ArchUnit, 14 REST Docs)
 ```
 
 ---

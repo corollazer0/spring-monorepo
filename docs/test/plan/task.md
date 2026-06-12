@@ -43,4 +43,4 @@
 
 - [ ] 학습자 파일럿 운영 및 피드백 반영 — 준비 가이드 작성됨: `docs/PILOT-GUIDE.md` (1회차 범위 = TestCraft 필수)
 - [x] spring-web-onboarding 커리큘럼 설계 — WebFlow로 완성 (docs/web/plan 참조)
-- [ ] 현업 프로젝트 `.claude/` 이식 + 스킬 보강
+- [ ] 현업 프로젝트 `.claude/` 이식 + 스킬 보강 — 준비 가이드 작성됨: `docs/CLAUDE-PORTING-GUIDE.md`

@@ -9,7 +9,7 @@ git 히스토리 자체가 학습 경로가 되도록 설계되었습니다.
 | 모듈 | 주제 | 상태 | 시작점 |
 |------|------|------|--------|
 | [`spring-test-onboarding`](./spring-test-onboarding) | **TestCraft** — JUnit5 / SpringBootTest 테스트 기본기 (일주일 과정) | ✅ 전 과정 완성 | [커리큘럼](./docs/test/curriculum/00-TestCraft-Curriculum.md) · [실행 가이드](./spring-test-onboarding/README.md) |
-| [`spring-batch-onboarding`](./spring-batch-onboarding) | **BatchFlow** — Spring Batch 배치 기본기 (필수 13 + 심화 5, 약 2주) | ✅ 전 과정 완성 | [커리큘럼](./docs/batch/curriculum/01-BatchFlow-Essential-Curriculum.md) · [실행 가이드](./spring-batch-onboarding/README.md) |
+| [`spring-batch-onboarding`](./spring-batch-onboarding) | **BatchFlow** — Spring Batch 배치 기본기 (필수 13 + 심화 6, 약 2주) | ✅ 전 과정 완성 | [커리큘럼](./docs/batch/curriculum/01-BatchFlow-Essential-Curriculum.md) · [실행 가이드](./spring-batch-onboarding/README.md) |
 | [`spring-web-onboarding`](./spring-web-onboarding) | **WebFlow** — 실무 API 종합 (외부연동/파일/캐싱/스케줄링/Actuator, 필수 9 + 심화 1) | ✅ 전 과정 완성 | [커리큘럼](./docs/web/curriculum/00-WebFlow-Curriculum.md) · [실행 가이드](./spring-web-onboarding/README.md) |
 
 ## 공통 기술 스택
@@ -63,7 +63,7 @@ Java 1.8 · Spring Boot 2.7.17 · Gradle 8.x · JUnit 5 · Lombok
 **목표**: 약 2주 안에 Job 설계 → Chunk → 오류 제어 → 재시작까지, 실무 배치를 스스로 만들고 테스트하는 기본기
 
 - **스택**: Spring Batch 4.3.x (5.x 금지) · JDBC(Cursor/Paging Reader) · H2(MODE=MSSQLServer) · @SpringBatchTest
-- **구조**: 필수 Step 1~13 (인프라 → Hello Job → Parameters → Flow → Chunk → Reader/Processor/Writer → 휴면전환 실전 → Skip/Retry → 재시작 → 정산 캡스톤) + 심화 Step 14~18 (멀티스레드/병렬 → 파티셔닝 → 비동기 성능 → JobOperator 운영 → 대량 알림 제2 캡스톤)
+- **구조**: 필수 Step 1~13 (인프라 → Hello Job → Parameters → Flow → Chunk → Reader/Processor/Writer → 휴면전환 실전 → Skip/Retry → 재시작 → 정산 캡스톤) + 심화 Step 14~19 (멀티스레드/병렬 → 파티셔닝 → 비동기 성능 → JobOperator 운영 → 대량 알림 제2 캡스톤 → 성능 측정 실습)
 
 | 진입로 | 경로 |
 |--------|------|

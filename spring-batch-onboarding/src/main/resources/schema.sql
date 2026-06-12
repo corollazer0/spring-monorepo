@@ -6,6 +6,8 @@
 -- (예약어를 피해 이름 짓는 것 자체가 실무 교훈!)
 -- =========================================================
 
+DROP TABLE IF EXISTS bulk_archive;
+DROP TABLE IF EXISTS bulk_member;
 DROP TABLE IF EXISTS notification_history;
 DROP TABLE IF EXISTS settlement;
 DROP TABLE IF EXISTS bank_transaction;
@@ -26,6 +28,18 @@ CREATE TABLE bank_transaction (
     tx_type          NVARCHAR(20) NOT NULL, -- DEPOSIT / WITHDRAW
     amount           BIGINT       NOT NULL,
     transaction_date DATE         NOT NULL
+);
+
+-- 대량 성능 실습 전용 (심화 Step 19 — 시드 없음, 테스트가 생성/정리한다)
+-- PK를 IDENTITY가 아닌 명시값으로: 대량 생성 시 ID를 우리가 통제 (1~N 연속 보장)
+CREATE TABLE bulk_member (
+    member_id BIGINT       PRIMARY KEY,
+    name      NVARCHAR(50) NOT NULL
+);
+
+CREATE TABLE bulk_archive (
+    member_id BIGINT       PRIMARY KEY,
+    name      NVARCHAR(50) NOT NULL
 );
 
 -- 휴면 전환 알림 이력 (심화 Step 16에서 채워진다 — 시드 없음)

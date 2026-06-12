@@ -6,6 +6,7 @@
 -- (예약어를 피해 이름 짓는 것 자체가 실무 교훈!)
 -- =========================================================
 
+DROP TABLE IF EXISTS notification_history;
 DROP TABLE IF EXISTS settlement;
 DROP TABLE IF EXISTS bank_transaction;
 DROP TABLE IF EXISTS member;
@@ -25,6 +26,14 @@ CREATE TABLE bank_transaction (
     tx_type          NVARCHAR(20) NOT NULL, -- DEPOSIT / WITHDRAW
     amount           BIGINT       NOT NULL,
     transaction_date DATE         NOT NULL
+);
+
+-- 휴면 전환 알림 이력 (심화 Step 16에서 채워진다 — 시드 없음)
+CREATE TABLE notification_history (
+    notification_id BIGINT IDENTITY PRIMARY KEY,
+    member_id       BIGINT        NOT NULL,
+    message         NVARCHAR(200) NOT NULL,
+    created_at      DATETIME      NOT NULL DEFAULT GETDATE()
 );
 
 -- 일일 정산 결과 (Step 13 캡스톤에서 채워진다)

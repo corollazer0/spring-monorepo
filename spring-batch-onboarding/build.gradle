@@ -3,6 +3,10 @@ dependencies {
     // starter-batch가 starter-jdbc(DataSource/JdbcTemplate)를 함께 가져온다
     implementation 'org.springframework.boot:spring-boot-starter-batch'
 
+    // 비동기 ItemProcessor/Writer (심화 Step 16): 코어가 아니라 integration 모듈에 있다!
+    // (버전은 Boot BOM이 관리 — spring-batch-core와 짝이 맞춰진다)
+    implementation 'org.springframework.batch:spring-batch-integration'
+
     runtimeOnly 'com.h2database:h2' // 버전은 Boot 2.7 BOM이 관리, MODE=MSSQLServer로 사용
 
     testImplementation 'org.springframework.batch:spring-batch-test' // @SpringBatchTest

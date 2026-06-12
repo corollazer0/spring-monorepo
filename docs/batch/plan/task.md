@@ -23,8 +23,13 @@
 - [x] Step 15(심화): Partitioning — `263bd17`
 - [x] 초보자 README + plan/task 문서 — `6104efc`
 
+## Plan 3: 성능/운영 심화 (Step 16~17) — 🔄 진행 중
+
+- [x] Step 16(심화): 비동기 처리 — AsyncItemProcessor/Writer + 동기 vs 비동기 성능 비교 (50-Step 30~34) — (이번 커밋)
+- [ ] Step 17(심화): JobOperator와 실행 이력 — 운영자의 콘솔 (50-Step 36~37·39)
+
 ## Plan 2: 다음 후보 — 📝 미착수
 
 - [ ] 학습자 파일럿 운영
-- [ ] (선택) Phase 4~6 심화 Step 추가
-- [ ] (선택) 대량 데이터 성능 실습 Step
+- [ ] (선택) 대량 알림 발송 제2 캡스톤 (50-Step 47~50)
+- [ ] (선택) 대량 데이터 성능 실습 Step (10만건 스키마 문서 기반)

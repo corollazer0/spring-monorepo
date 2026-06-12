@@ -40,3 +40,23 @@
 - [ ] 학습자 파일럿 및 피드백 반영
 - [ ] (선택) Phase 4~6 심화 Step 추가: 비동기 처리, JobOperator/스케줄링, 대량 알림 프로젝트
 - [ ] (선택) 대량 데이터 성능 실습: 기존 10만건 스키마 문서 기반 성능 측정 Step
+
+## Plan 3. 성능/운영 심화 — Step 16~17 (2026-06-12 사용자 요청으로 착수)
+
+### 배경/목표
+50-Step 문서의 미구현 성능/운영 파트를 기존 심화(14~15) 형식으로 압축 추가한다.
+- **Step 16 (성능)**: 50-Step 30~34 압축 — AsyncItemProcessor/AsyncItemWriter(비동기),
+  fetchSize/JDBC batch 튜닝 포인트, 동기 vs 비동기 성능 비교 테스트
+- **Step 17 (운영)**: 50-Step 36~37(+39 언급) 압축 — JobOperator/JobRegistry,
+  실패 Job 운영 재기동(restart), JobExplorer 실행 이력
+- 미채택: 38 알림 연동/40 대시보드(외부 인프라 필요), 47~50 대량 알림(제2 캡스톤 — 분량 과대)
+
+### 설계 결정
+| 결정 | 내용 | 이유 |
+|------|------|------|
+| Step 16 무대 | 휴면회원(DORMANT 15명) 알림 발송 — notification_history 테이블 신설 | 50-Step 47~50의 알림 도메인을 소규모 차용, 기존 시드 재사용 |
+| 지연 시뮬레이션 | Processor에 20ms sleep (외부 발송 API 흉내) | 15건 x 20ms = 동기 300ms 바닥 보장 → 비교 테스트 결정성 |
+| 비동기 대비 Step 14 | AsyncItemProcessor는 reader가 단일 스레드 유지 — 커서 리더 그대로 OK | 멀티스레드 Step(페이징 강제)과의 차별점이 곧 교육 포인트 |
+| 의존성 | spring-batch-integration (Async 2종의 출처, 버전 Boot BOM) | 코어에 없다는 것 자체가 함정/교육 포인트 |
+| Step 17 재기동 데모 | 정적 스위치(BROKEN)로 환경 장애 시뮬레이션 → 복구 후 operator.restart | 동일 파라미터 재시작의 결정적 데모 (교보재 규약 준수: 정리 의무) |
+| JobRegistry | JobRegistryBeanPostProcessor를 OpsDemoJobConfig에 명시 등록 | 등록 누락 = NoSuchJobException 함정의 교육화 |

@@ -81,9 +81,11 @@ Skip/Retry/Listener   "새벽 3시에 죽은 배치, 처음부터 다시?"
 |------|------|------|------|:---:|------|
 | 14 | Multi-threaded Step & Parallel Flow | 4시간짜리 배치를 1시간으로 | TaskExecutor, thread-safe reader 조건, Flow.split | 27, 28 | 1.5h |
 | 15 | Partitioning | 스레드만으론 부족할 때 — 데이터 분할 | Partitioner, gridSize, Master-Worker | 29 | 1.5h |
+| 16 | 비동기 처리 — Processor가 느릴 때 | 병목이 가공(외부 호출)뿐인데 Step 전체 병렬화는 과잉 | AsyncItemProcessor/Writer(integration 모듈!), fetchSize/batch INSERT 튜닝, 성능 비교 3원칙 | 30~32, 34 | 1.5h |
+| 17 | JobOperator와 실행 이력 — 운영자의 콘솔 | 테스트 코드 없이 Job을 제어·재기동하려면 | JobOperator, JobRegistry(BeanPostProcessor), restart, JobExplorer 이력 | 36, 37 (+39) | 1.5h |
 
-> 더 깊은 주제(비동기 처리, 성능 튜닝, JobOperator/스케줄링/모니터링, 대량 알림 프로젝트)는
-> [00 문서의 Phase 4~6 (Step 27~50)](./00-BatchFlow-Curriculum.md)을 참조하세요.
+> 남은 참조 주제(알림/대시보드 연동, Quartz, 대량 알림 프로젝트 47~50)는
+> [00 문서의 Phase 5~6](./00-BatchFlow-Curriculum.md)을 참조하세요.
 
 ## 4. 도메인: 미니 금융 배치
 

@@ -38,6 +38,6 @@
 
 ## Plan 2: 다음 후보 — 📝 미착수
 
-- [ ] 학습자 파일럿 운영 — 준비 가이드: `docs/PILOT-GUIDE.md` (Batch는 TestCraft 수료자 대상 2회차 이후)
+- [ ] 학습자 파일럿 운영 — 준비물: `docs/pilot/` (Batch는 TestCraft 수료자 대상 2회차 이후)
 - [x] ~~(선택) 대량 알림 발송 제2 캡스톤~~ → Plan 4로 완료
 - [x] ~~(선택) 대량 데이터 성능 실습 Step~~ → Plan 5로 착수

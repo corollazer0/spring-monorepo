@@ -34,9 +34,13 @@
 
 - [x] 완전 초보자용 실행 가이드(모듈 README.md) 신설 + 루트 README 링크 — `2e97d76`
 
+## Plan 5: 심화 확장 (Step 13~14) — 🔄 진행 중
+
+- [ ] Step 13(심화): ArchUnit — 아키텍처를 테스트로 봉인 (계층 의존/네이밍/모듈 격리)
+- [ ] Step 14(심화): Spring REST Docs — 테스트가 문서를 만든다
+
 ## Plan 4: 다음 후보 — 📝 미착수
 
 - [ ] 학습자 파일럿 운영 및 피드백 반영
-- [ ] spring-web-onboarding 커리큘럼 설계
+- [x] spring-web-onboarding 커리큘럼 설계 — WebFlow로 완성 (docs/web/plan 참조)
 - [ ] 현업 프로젝트 `.claude/` 이식 + 스킬 보강
-- [ ] (선택) Step 13: 테스트 데이터 관리 심화 또는 Spring REST Docs

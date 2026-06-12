@@ -43,4 +43,5 @@
 
 - [ ] 학습자 파일럿 운영 및 피드백 반영 — **1회차 시작 준비 완료**: `docs/pilot/` (가이드+학습자 키트+로그 템플릿). 남은 일: 대상자 선정·일정·Day 0 점검 (Plan 6)
 - [x] spring-web-onboarding 커리큘럼 설계 — WebFlow로 완성 (docs/web/plan 참조)
-- [ ] 현업 프로젝트 `.claude/` 이식 + 스킬 보강 — 준비 가이드 작성됨: `docs/CLAUDE-PORTING-GUIDE.md`
+- [ ] 현업 프로젝트 `.claude/` 이식 + 스킬 보강 — 가이드 완비: `docs/CLAUDE-PORTING-GUIDE.md`
+      (+8장 공통 라이브러리 특화, 첫 대상 = NCDPcommon) · `docs/COMPOSITE-BUILD-GUIDE.md` (개발 루프 단축)

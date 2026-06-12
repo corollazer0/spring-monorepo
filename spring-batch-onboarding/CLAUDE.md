@@ -10,7 +10,7 @@
 Spring Batch 미경험자가 **약 2주(하루 1~2시간, 자기주도)** 안에 실무 배치의 기본기
 (Job 설계 → Chunk → 오류 제어 → 재시작)를 갖추게 하는 학습 모듈입니다.
 
-- **학습 기준 커리큘럼**: `docs/batch/curriculum/01-BatchFlow-Essential-Curriculum.md` (필수 Step 1~13 + 심화 14~15)
+- **학습 기준 커리큘럼**: `docs/batch/curriculum/01-BatchFlow-Essential-Curriculum.md` (필수 Step 1~13 + 심화 14~17)
 - 기존 50-Step 문서(`00-BatchFlow-Curriculum.md`)는 **심화/전체 참조 자료** (필수 트랙과의 매핑표는 01 문서)
 - 학습 철학: 문제 주도형 — 각 Step은 앞 단계의 한계에서 출발 (TestCraft와 동일)
 
@@ -42,7 +42,9 @@ src/main/java/com/batchflow/
 ├── job/                             # Job 정의 (도메인별 하위 패키지)
 │   ├── hello/                       # Step 2
 │   ├── dormant/                     # Step 7~12 (휴면회원 전환)
-│   └── settlement/                  # Step 13 캡스톤 (일일 정산)
+│   ├── settlement/                  # Step 13 캡스톤 (일일 정산)
+│   ├── async/                       # 심화 Step 16 (비동기 알림 — spring-batch-integration)
+│   └── ops/                         # 심화 Step 17 (JobOperator/JobRegistry)
 ├── domain/                          # 순수 자바 도메인 (JPA 엔티티 아님!)
 ├── listener/                        # Job/Step/Skip 리스너
 └── (reader/processor/writer는 JobConfig 내 @Bean 우선, 복잡해지면 분리)
@@ -57,7 +59,7 @@ src/test/java/com/batchflow/
 │   ├── example/   # 완성 모범 — 항상 통과
 │   ├── exercise/  # @Disabled TODO 골격 — 컴파일 항상 성공
 │   └── answer/    # 모범답안 — 항상 통과
-└── advanced/step14/ ~ step15/       # 심화
+└── advanced/step14/ ~ step17/       # 심화 (14 멀티스레드/병렬, 15 파티셔닝, 16 비동기, 17 JobOperator)
 ```
 
 example/exercise/answer 3종 규약은 TestCraft와 동일

@@ -39,6 +39,15 @@ description: Spring 애플리케이션/테스트의 원인 모를 동작(401/403
 | 빌드 급감속 | @MockBean 조합 차이로 컨텍스트 캐시 무효화 — 기동 횟수를 로그에서 세어보라 |
 | UnnecessaryStubbingException | 그 테스트에서 안 일어나는 stubbing — 시나리오 오해 신호 (lenient로 끄지 말 것) |
 
+### 배치 (Spring Batch)
+| 증상 | 1순위 의심 |
+|------|-----------|
+| JobInstanceAlreadyCompleteException | 같은 파라미터로 성공한 Job 재실행(설계!) — 테스트는 removeJobExecutions 또는 유니크 파라미터 |
+| JobOperator가 NoSuchJobException (Job 빈은 있는데) | JobRegistryBeanPostProcessor 미등록 — 컨텍스트의 빈 ≠ 레지스트리의 등록 |
+| 재시작이 "이어서"가 아니라 처음부터 | restart(실행ID) 대신 새 파라미터 start를 함 / saveState(false)·상태 전이 설계 확인 |
+| AsyncItemProcessor가 import 안 됨 | spring-batch-core가 아니라 spring-batch-integration 모듈 의존성 누락 |
+| JobLauncherTestUtils 주입 실패 (Job 빈 모호) | 컨텍스트에 Job 빈 2개 이상 — JobLauncher 직접 사용 + 유니크 파라미터로 전환 |
+
 ### 환경 (Windows)
 | 증상 | 1순위 의심 |
 |------|-----------|

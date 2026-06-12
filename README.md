@@ -9,7 +9,7 @@ git 히스토리 자체가 학습 경로가 되도록 설계되었습니다.
 | 모듈 | 주제 | 상태 | 시작점 |
 |------|------|------|--------|
 | [`spring-test-onboarding`](./spring-test-onboarding) | **TestCraft** — JUnit5 / SpringBootTest 테스트 기본기 (일주일 과정) | ✅ 전 과정 완성 | [커리큘럼](./docs/test/curriculum/00-TestCraft-Curriculum.md) · [실행 가이드](./spring-test-onboarding/README.md) |
-| [`spring-batch-onboarding`](./spring-batch-onboarding) | **BatchFlow** — Spring Batch 배치 기본기 (필수 13 + 심화 2, 약 2주) | ✅ 필수 트랙 완성 | [커리큘럼](./docs/batch/curriculum/01-BatchFlow-Essential-Curriculum.md) · [실행 가이드](./spring-batch-onboarding/README.md) |
+| [`spring-batch-onboarding`](./spring-batch-onboarding) | **BatchFlow** — Spring Batch 배치 기본기 (필수 13 + 심화 4, 약 2주) | ✅ 전 과정 완성 | [커리큘럼](./docs/batch/curriculum/01-BatchFlow-Essential-Curriculum.md) · [실행 가이드](./spring-batch-onboarding/README.md) |
 | [`spring-web-onboarding`](./spring-web-onboarding) | **WebFlow** — 실무 API 종합 (외부연동/파일/캐싱/스케줄링/Actuator, 필수 9 + 심화 1) | ✅ 전 과정 완성 | [커리큘럼](./docs/web/curriculum/00-WebFlow-Curriculum.md) · [실행 가이드](./spring-web-onboarding/README.md) |
 
 ## 공통 기술 스택

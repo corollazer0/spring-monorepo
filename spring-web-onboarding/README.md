@@ -94,7 +94,7 @@ curl http://localhost:8080/actuator/health
 
 | 문서 | 내용 |
 |------|------|
-| [커리큘럼](../docs/web/curriculum/00-WebFlow-Curriculum.md) | 학습 철학, Step 1~9 지도, 시그니처 테스트 기법 |
+| [커리큘럼](../docs/web/curriculum/00-WebFlow-Curriculum.md) | 학습 철학, Step 1~10 지도, 시그니처 테스트 기법 |
 | [모듈 규칙](./CLAUDE.md) | 코드/테스트 작성 규약 (AI 협업 포함) |
 | [계획/태스크](../docs/web/plan/plan.md) | 의사결정 기록과 진행 현황 |
 | [테스트 치트시트](../docs/test/skills/spring-test-annotations.md) | 전 모듈 공통 어노테이션 정리 |

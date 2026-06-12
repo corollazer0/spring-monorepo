@@ -114,10 +114,15 @@ BUILD SUCCESSFUL
 5) step01/answer 와 비교 → 다음 Step으로
 ```
 
+- **필수 코스**: Step 1~9 + 12(View) — 순수 단위부터 E2E·캡스톤·화면 검증까지
+- **심화 코스** (필수 완주 후): Step 10~14 — JWT 인증 → 테스트 품질 → ArchUnit
+  구조 봉인 → REST Docs 문서화 (`advanced/step10~14` 패키지)
+
 특정 Step의 테스트만 돌리기:
 
 ```bash
 .\gradlew :spring-test-onboarding:test --tests "com.testonboarding.step01.*"
+.\gradlew :spring-test-onboarding:test --tests "com.testonboarding.advanced.step13.*"  # 심화
 ```
 
 ---
@@ -130,7 +135,7 @@ BUILD SUCCESSFUL
 | `JAVA_HOME is not set` | JDK 설치 후 환경변수 JAVA_HOME 설정, 터미널 재시작 |
 | `gradlew: command not found` | 레포 최상위 폴더인지 확인, Windows는 `.\gradlew` |
 | 콘솔 한글이 깨짐 | 표시 문제일 뿐(코드페이지) — 테스트 결과(HTML 리포트)는 정상 |
-| 테스트 27개가 skipped | 정상! 여러분이 풀 exercise입니다 |
+| skipped 테스트 다수 | 정상! 여러분이 풀 exercise입니다 |
 | 그 외 이상 동작 | `docs/test/skills/spring-test-annotations.md`의 **단골 미스터리 진단표** 참고 |
 
 ---
@@ -139,6 +144,6 @@ BUILD SUCCESSFUL
 
 | 문서 | 내용 |
 |------|------|
-| [커리큘럼](../docs/test/curriculum/00-TestCraft-Curriculum.md) | 학습 철학, Step 1~12 지도, 진행 루틴 |
+| [커리큘럼](../docs/test/curriculum/00-TestCraft-Curriculum.md) | 학습 철학, Step 1~14 지도, 진행 루틴 |
 | [치트시트](../docs/test/skills/spring-test-annotations.md) | 언제 무엇을 쓰나 + 진단표 |
 | [모듈 규칙](./CLAUDE.md) | 코드/테스트 작성 규약 (AI 협업 포함) |

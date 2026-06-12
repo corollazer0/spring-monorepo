@@ -75,7 +75,7 @@ cd spring-monorepo
 
 | 문서 | 내용 |
 |------|------|
-| [필수 트랙 커리큘럼](../docs/batch/curriculum/01-BatchFlow-Essential-Curriculum.md) | 학습 철학, Step 1~15 지도, 50-Step 매핑 |
-| [전체 50-Step (심화 참조)](../docs/batch/curriculum/00-BatchFlow-Curriculum.md) | Phase 4~6 (성능/운영/실전 프로젝트) |
+| [필수 트랙 커리큘럼](../docs/batch/curriculum/01-BatchFlow-Essential-Curriculum.md) | 학습 철학, Step 1~17 지도, 50-Step 매핑 |
+| [전체 50-Step (심화 참조)](../docs/batch/curriculum/00-BatchFlow-Curriculum.md) | 잔여 참조 주제 (알림·대시보드 연동, 대량 알림 프로젝트 47~50) |
 | [모듈 규칙](./CLAUDE.md) | 코드/테스트 작성 규약 (AI 협업 포함) |
 | [계획/태스크](../docs/batch/plan/plan.md) | 의사결정 기록과 진행 현황 |

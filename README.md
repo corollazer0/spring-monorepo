@@ -53,14 +53,24 @@ Java 1.8 · Spring Boot 2.7.17 · Gradle 8.x · JUnit 5 · Lombok
 | 진입로 | 경로 |
 |--------|------|
 | 커리큘럼 전체 지도 | `docs/test/curriculum/00-TestCraft-Curriculum.md` |
-| Step별 학습 가이드 | `docs/test/education/FOR-Test-Step01~11.md` |
+| Step별 학습 가이드 | `docs/test/education/FOR-Test-Step01~14.md` |
 | 캡스톤 요구사항/체크리스트 | `docs/test/education/FOR-Test-Step09-Requirements.md` |
 | 어노테이션 치트시트 + 미스터리 진단표 | `docs/test/skills/spring-test-annotations.md` |
 
 ## ⚙️ BatchFlow (spring-batch-onboarding)
 
-Spring Batch의 Job/Step/Tasklet부터 Chunk, 오류 제어, 성능 최적화까지 다루는 과정입니다.
-`docs/batch/` 아래의 커리큘럼과 education 문서를 따라 진행합니다.
+**대상**: TestCraft를 수료한 SpringBoot 개발자
+**목표**: 약 2주 안에 Job 설계 → Chunk → 오류 제어 → 재시작까지, 실무 배치를 스스로 만들고 테스트하는 기본기
+
+- **스택**: Spring Batch 4.3.x (5.x 금지) · JDBC(Cursor/Paging Reader) · H2(MODE=MSSQLServer) · @SpringBatchTest
+- **구조**: 필수 Step 1~13 (인프라 → Hello Job → Parameters → Flow → Chunk → Reader/Processor/Writer → 휴면전환 실전 → Skip/Retry → 재시작 → 정산 캡스톤) + 심화 Step 14~17 (멀티스레드/병렬 → 파티셔닝 → 비동기 성능 → JobOperator 운영)
+
+| 진입로 | 경로 |
+|--------|------|
+| 필수 트랙 커리큘럼 (학습 기준) | `docs/batch/curriculum/01-BatchFlow-Essential-Curriculum.md` |
+| Step별 학습 가이드 | `docs/batch/education/FOR-BatchFlow-Step01~17.md` |
+| 전체 50-Step (심화 참조) | `docs/batch/curriculum/00-BatchFlow-Curriculum.md` |
+| 실행 가이드 (초보자용) | `spring-batch-onboarding/README.md` |
 
 ## 🌐 WebFlow (spring-web-onboarding)
 
@@ -75,7 +85,7 @@ Spring Batch의 Job/Step/Tasklet부터 Chunk, 오류 제어, 성능 최적화까
 | 진입로 | 경로 |
 |--------|------|
 | 커리큘럼 전체 지도 | `docs/web/curriculum/00-WebFlow-Curriculum.md` |
-| Step별 학습 가이드 | `docs/web/education/FOR-WebFlow-Step01~09.md` |
+| Step별 학습 가이드 | `docs/web/education/FOR-WebFlow-Step01~10.md` |
 | 캡스톤 요구사항/체크리스트 | `docs/web/education/FOR-WebFlow-Step09.md` |
 | 실행 가이드 (초보자용) | `spring-web-onboarding/README.md` |
 

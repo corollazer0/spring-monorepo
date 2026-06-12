@@ -24,4 +24,4 @@
 
 ## Plan 3: 심화 — ✅ 완료
 
-- [x] Step 10(심화): 서킷 브레이커 (Resilience4j 1.7.1, WebClient 미채택 — plan.md Plan 3) — (이번 커밋)
+- [x] Step 10(심화): 서킷 브레이커 (Resilience4j 1.7.1, WebClient 미채택 — plan.md Plan 3) — `91b1679`

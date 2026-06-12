@@ -58,7 +58,7 @@ cd spring-monorepo
 
 - **필수 트랙**: Step 1~13 (약 2주, 하루 1~2시간) — 인프라 → Job 구조 → Chunk →
   휴면회원 전환 실전 → 오류 제어 → 재시작 → 정산 캡스톤
-- **심화**: Step 14~17 (멀티스레드/병렬, 파티셔닝, 비동기 성능, JobOperator 운영)
+- **심화**: Step 14~18 (멀티스레드/병렬, 파티셔닝, 비동기 성능, JobOperator 운영, 대량 알림 제2 캡스톤)
 - 기존 50-Step 전체 커리큘럼(00 문서)은 심화 참조 자료입니다
 
 ## 4. 자주 막히는 것 (FAQ)
@@ -75,7 +75,7 @@ cd spring-monorepo
 
 | 문서 | 내용 |
 |------|------|
-| [필수 트랙 커리큘럼](../docs/batch/curriculum/01-BatchFlow-Essential-Curriculum.md) | 학습 철학, Step 1~17 지도, 50-Step 매핑 |
-| [전체 50-Step (심화 참조)](../docs/batch/curriculum/00-BatchFlow-Curriculum.md) | 잔여 참조 주제 (알림·대시보드 연동, 대량 알림 프로젝트 47~50) |
+| [필수 트랙 커리큘럼](../docs/batch/curriculum/01-BatchFlow-Essential-Curriculum.md) | 학습 철학, Step 1~18 지도, 50-Step 매핑 |
+| [전체 50-Step (심화 참조)](../docs/batch/curriculum/00-BatchFlow-Curriculum.md) | 잔여 참조 주제 (알림·대시보드 연동, Quartz 클러스터) |
 | [모듈 규칙](./CLAUDE.md) | 코드/테스트 작성 규약 (AI 협업 포함) |
 | [계획/태스크](../docs/batch/plan/plan.md) | 의사결정 기록과 진행 현황 |

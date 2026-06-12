@@ -49,6 +49,8 @@ description: Spring 애플리케이션/테스트의 원인 모를 동작(401/403
 | 재시작이 "이어서"가 아니라 처음부터 | restart(실행ID) 대신 새 파라미터 start를 함 / saveState(false)·상태 전이 설계 확인 |
 | AsyncItemProcessor가 import 안 됨 | spring-batch-core가 아니라 spring-batch-integration 모듈 의존성 누락 |
 | JobLauncherTestUtils 주입 실패 (Job 빈 모호) | 컨텍스트에 Job 빈 2개 이상 — JobLauncher 직접 사용 + 유니크 파라미터로 전환 |
+| @SpringBatchTest 전 테스트가 Could not create job execution from method | JobExecution 반환 헬퍼 메서드를 잡 스코프 팩토리로 오인 — 헬퍼는 JobParameters 반환으로 |
+| 파티션 Job 카운트가 정확히 2배 | manager Step이 워커 카운트를 집계해 보유 — 합산은 워커 Step만 필터해서 |
 
 ### 환경 (Windows)
 | 증상 | 1순위 의심 |

@@ -28,8 +28,12 @@
 - [x] Step 16(심화): 비동기 처리 — AsyncItemProcessor/Writer + 동기 vs 비동기 성능 비교 (50-Step 30~34) — `f3abdaa`
 - [x] Step 17(심화): JobOperator와 실행 이력 — 운영자의 콘솔 (50-Step 36~37·39) — `3c0d68b`
 
+## Plan 4: 제2 캡스톤 — 대량 알림 발송 (Step 18) — ✅ 완료
+
+- [x] Step 18(심화 캡스톤): 대량 알림 발송 Job — 파티셔닝+skip+자연 멱등 종합 (50-Step 47~50) — (이번 커밋)
+
 ## Plan 2: 다음 후보 — 📝 미착수
 
 - [ ] 학습자 파일럿 운영 — 준비 가이드: `docs/PILOT-GUIDE.md` (Batch는 TestCraft 수료자 대상 2회차 이후)
-- [ ] (선택) 대량 알림 발송 제2 캡스톤 (50-Step 47~50)
+- [x] ~~(선택) 대량 알림 발송 제2 캡스톤~~ → Plan 4로 착수
 - [ ] (선택) 대량 데이터 성능 실습 Step (10만건 스키마 문서 기반)

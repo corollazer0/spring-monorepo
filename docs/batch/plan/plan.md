@@ -66,3 +66,27 @@
 - Step 16 `f3abdaa` / Step 17 `3c0d68b` — 매 커밋 모듈 테스트 그린 (115건, +10)
 - 계획 대비 전부 계획대로 구현. JobOperator는 Boot 자동구성(SimpleJobOperator) 사용 확인
 - spring-troubleshoot 진단표에 배치 섹션 신설 (5개 함정 자산화)
+
+## Plan 4. 제2 캡스톤 — 대량 알림 발송 Job (Step 18, 2026-06-12 사용자 요청으로 착수)
+
+### 배경/목표
+50-Step 47~50(대량 알림 발송)을 제2 캡스톤으로 구현한다. 제1 캡스톤(13, 필수 트랙 종합)과
+구별되는 정체성: **심화 트랙(14~17) 무기의 종합 + 설계 판단** — 어떤 병렬화를 고를 것인가,
+부분 실패를 어떻게 다룰 것인가, 재발송을 어떻게 막을 것인가.
+
+### 설계 결정
+| 결정 | 내용 | 이유 |
+|------|------|------|
+| 형식 | Step 13과 동일 — 프로덕션 모범 제공, 테스트 전략 수립이 과제 (Requirements + warmup + answer) | 캡스톤 형식 일관성 |
+| 무대 | ACTIVE 30명에게 캠페인 알림 → notification_history 적재 (시드 무변경) | WITHDRAWN 발송=사고 — 대상자 필터가 첫 요구사항 |
+| 병렬화 | **Partitioning 채택** (MemberIdRangePartitioner 재사용, gridSize 3) | 50-Step 49와 정합 + 기존 자산 재사용. Async+skip 조합은 Future 언래핑 시점에 skip 의미론이 꼬임 — 미채택 사유를 교육 포인트로 문서화 |
+| 부분 실패 | faultTolerant skip(NotificationSendException) + skipLimit + 전용 SkipListener 로그 | Step 11 재적용 — 1명 실패가 30명 발송을 막으면 안 된다 |
+| 재발송 방지 | reader 쿼리의 NOT EXISTS (campaign 접두 메시지) — **자연 멱등** | Step 12 철학. 실패 복구 시나리오(스킵된 2명만 재발송)가 보상으로 따라온다 |
+| 발송기 | MarketingNotificationSender + FAIL_MEMBER_IDS 정적 스위치 (교보재 규약: 운영 금지+정리 의무) | 결정적 실패 연출 (지연 시뮬은 Step 16에서 다뤘으므로 생략 — 캡스톤은 복원력 중심) |
+| 메시지 접두 | `캠페인명: ` 콜론 구분 (대괄호 금지) | MS-SQL LIKE에서 [ ]는 와일드카드 — H2에선 통과하고 실서버에서 깨지는 함정 회피 |
+
+### 구현 결과 (2026-06-12)
+- 계획대로 구현 (해시는 task.md). 테스트 작성 중 실전 함정 2건 발견·자산화:
+  ① @SpringBatchTest에서 JobExecution 반환 헬퍼 = 잡 스코프 팩토리 오인 → 전 테스트 사망
+  ② 파티션 manager Step의 카운트 집계 → 전체 합산 시 이중 계산 (워커만 필터)
+  → 둘 다 spring-troubleshoot 진단표 + Step 18 해설(3-4)에 기록
